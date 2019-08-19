@@ -1,8 +1,8 @@
 package dao
 
 import (
-	"go-cloud"
-	"go-cloud/examples/models"
+	"examples/models"
+	"github.com/mgr9525/go-cloud"
 )
 
 var UserDao = gocloud.Dao{

@@ -1,8 +1,8 @@
 package main
 
 import (
-	"go-cloud"
-	"go-cloud/examples/routes"
+	"examples/routes"
+	"github.com/mgr9525/go-cloud"
 	"html/template"
 )
 

@@ -1,10 +1,9 @@
 package routes
 
 import (
+	"examples/dao"
 	"fmt"
-	"go-cloud"
-	"go-cloud/examples/dao"
-	"go-cloud/examples/models"
+	"github.com/mgr9525/go-cloud"
 	"gopkg.in/macaron.v1"
 )
 
