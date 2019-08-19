@@ -22,7 +22,7 @@ func customFun()[]template.FuncMap {
 	}}
 }
 func constomRoute() {
-	core.Web.Any("/", routes.IndexHandler)
+	gocloud.Web.Any("/", routes.IndexHandler)
 }
 ```
 ## 生成数据表Struct
