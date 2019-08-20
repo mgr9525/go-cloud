@@ -18,8 +18,8 @@ func RuisRecovers(name string, handle ErrHandle) {
 	}
 }
 
-func NewParamMap() *map[string]interface{} {
-	return new(map[string]interface{})
+func GetNewMaps() map[string]interface{} {
+	return make(map[string]interface{})
 }
 
 func ClearXSS(src string) string {
