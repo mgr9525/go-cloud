@@ -42,4 +42,8 @@ func AccessAllowFun(c *macaron.Context) {
 	c.Resp.Header().Add("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 	c.Resp.Header().Add("Access-Control-Allow-Headers", "DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization")
 	c.Resp.Header().Add("Access-Control-Allow-Credentials", "true")
+
+	if c.Req.Method == "OPTIONS" {
+		c.PlainText(200, []byte("ok"))
+	}
 }
