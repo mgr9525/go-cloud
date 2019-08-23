@@ -8,7 +8,7 @@ import (
 	"gopkg.in/macaron.v1"
 )
 
-func IndexHandler(c *macaron.Context) {
+func IndexHandler(c *macaron.Context, contJSON gocloud.ContJSON) {
 	// Check auto-login.
 	/*uname := c.GetCookie(setting.CookieUserName)
 	if len(uname) != 0 {
