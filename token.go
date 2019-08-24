@@ -102,10 +102,14 @@ func ClearToken(c *macaron.Context) error {
 		return errors.New("token not enable")
 	}
 
-	tkc, err := c.Req.Cookie(CloudConf.Token.Name)
-	if err == nil {
-		tkc.MaxAge = -1
-		c.Resp.Header().Add("Set-Cookie", tkc.String())
+	cke := http.Cookie{Name: CloudConf.Token.Name, HttpOnly: CloudConf.Token.Httponly}
+	if CloudConf.Token.Path != "" {
+		cke.Path = CloudConf.Token.Path
 	}
+	if CloudConf.Token.Domain != "" {
+		cke.Domain = CloudConf.Token.Domain
+	}
+	cke.MaxAge = -1
+	c.Resp.Header().Set("Set-Cookie", cke.String())
 	return nil
 }
