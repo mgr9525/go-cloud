@@ -42,24 +42,27 @@ func ClearHTML(src string) string {
 	return rets
 }
 
-func getContJson(c *macaron.Context) ContJSON {
-	defer RuisRecovers("getContJson", nil)
+func GetContJson(c *macaron.Context) (cjs ContJSON, rterr error) {
+	defer RuisRecovers("getContJson", func() {
+		rterr = errors.New("logic error")
+	})
 	pars := GetNewMaps()
 	contp := c.Req.Header.Get("Content-Type")
-	if strings.HasPrefix(contp, "application/json") {
-		bts, err := c.Req.Body().Bytes()
-		if err != nil {
-			return pars
-		}
-		err = json.Unmarshal(bts, &pars)
-		if err != nil {
-			return pars
-		}
+	if !strings.HasPrefix(contp, "application/json") {
+		return nil, errors.New("content not json")
 	}
-	return pars
+	bts, err := c.Req.Body().Bytes()
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(bts, &pars)
+	if err != nil {
+		return nil, err
+	}
+	return pars, nil
 }
 func CheckContJson(c *macaron.Context) {
-	cont := getContJson(c)
+	cont, _ := GetContJson(c)
 	c.Set(reflect.TypeOf(cont), reflect.ValueOf(cont))
 }
 func AccessAllowFun(c *macaron.Context) {
