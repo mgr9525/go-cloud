@@ -42,7 +42,7 @@ func ClearHTML(src string) string {
 	return rets
 }
 
-func GetContJson(c *macaron.Context) (cjs ContJSON, rterr error) {
+func getContJson(c *macaron.Context) (cjs ContJSON, rterr error) {
 	defer RuisRecovers("getContJson", func() {
 		rterr = errors.New("logic error")
 	})
@@ -62,7 +62,7 @@ func GetContJson(c *macaron.Context) (cjs ContJSON, rterr error) {
 	return pars, nil
 }
 func CheckContJson(c *macaron.Context) {
-	cont, _ := GetContJson(c)
+	cont, _ := getContJson(c)
 	c.Set(reflect.TypeOf(cont), reflect.ValueOf(cont))
 }
 func AccessAllowFun(c *macaron.Context) {
