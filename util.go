@@ -49,15 +49,15 @@ func getContJson(c *macaron.Context) (cjs ContJSON, rterr error) {
 	pars := GetNewMaps()
 	contp := c.Req.Header.Get("Content-Type")
 	if !strings.HasPrefix(contp, "application/json") {
-		return nil, errors.New("content not json")
+		return ContJSON{}, errors.New("content not json")
 	}
 	bts, err := c.Req.Body().Bytes()
 	if err != nil {
-		return nil, err
+		return ContJSON{}, err
 	}
 	err = json.Unmarshal(bts, &pars)
 	if err != nil {
-		return nil, err
+		return ContJSON{}, err
 	}
 	return pars, nil
 }
