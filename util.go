@@ -2,9 +2,11 @@ package gocloud
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"gopkg.in/macaron.v1"
 	"reflect"
+	"strconv"
 	"strings"
 )
 
@@ -69,4 +71,38 @@ func AccessAllowFun(c *macaron.Context) {
 	if c.Req.Method == "OPTIONS" {
 		c.PlainText(200, []byte("ok"))
 	}
+}
+
+func (e ContJSON) GetString(key string) string {
+	if e[key] == nil {
+		return ""
+	}
+
+	v := e[key]
+	switch v.(type) {
+	case string:
+		return v.(string)
+	}
+	return ""
+}
+
+func (e ContJSON) GetInt(key string) (int, error) {
+	if e[key] == nil {
+		return 0, errors.New("not found")
+	}
+
+	v := e[key]
+	switch v.(type) {
+	case int:
+		return v.(int), nil
+	case string:
+		return strconv.Atoi(v.(string))
+	case int64:
+		return int(v.(int64)), nil
+	case float32:
+		return int(v.(float32)), nil
+	case float64:
+		return int(v.(float64)), nil
+	}
+	return 0, errors.New("not found")
 }
