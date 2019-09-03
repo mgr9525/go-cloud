@@ -109,3 +109,35 @@ func (e ContJSON) GetInt(key string) (int, error) {
 	}
 	return 0, errors.New("not found")
 }
+func (e ContJSON) GetFloat(key string) (float64, error) {
+	if e[key] == nil {
+		return 0, errors.New("not found")
+	}
+
+	v := e[key]
+	switch v.(type) {
+	case int:
+		return float64(v.(int)), nil
+	case string:
+		return strconv.ParseFloat(v.(string), 64)
+	case int64:
+		return float64(v.(int64)), nil
+	case float32:
+		return float64(v.(float32)), nil
+	case float64:
+		return v.(float64), nil
+	}
+	return 0, errors.New("not found")
+}
+func (e ContJSON) GetBool(key string) bool {
+	if e[key] == nil {
+		return false
+	}
+
+	v := e[key]
+	switch v.(type) {
+	case bool:
+		return v.(bool)
+	}
+	return false
+}
