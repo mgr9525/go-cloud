@@ -81,12 +81,7 @@ func (e ContJSON) GetString(key string) string {
 		return ""
 	}
 
-	v := e[key]
-	switch v.(type) {
-	case string:
-		return v.(string)
-	}
-	return ""
+	return fmt.Sprintf("%v", e[key])
 }
 
 func (e ContJSON) GetInt(key string) (int, error) {
