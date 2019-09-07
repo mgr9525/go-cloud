@@ -81,7 +81,7 @@ func (e ContJSON) GetString(key string) string {
 		return ""
 	}
 
-	return fmt.Sprintf("%v", e[key])
+	return fmt.Sprint(e[key])
 }
 
 func (e ContJSON) GetInt(key string) (int, error) {

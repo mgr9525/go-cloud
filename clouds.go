@@ -135,8 +135,13 @@ func (e *CloudApi) insert(c *macaron.Context) {
 		return
 	}
 
+	if e.dao.child == nil {
+		c.PlainText(511, []byte("dao.child 错误"))
+		return
+	}
+
 	var n int64 = 0
-	info := e.dao.GetModel()
+	info := e.dao.child.GetModel()
 	err = json.Unmarshal([]byte(beans), info)
 	if err == nil {
 		n, _ = e.dao.Insert(info)
@@ -168,6 +173,11 @@ func (e *CloudApi) update(c *macaron.Context) {
 		return
 	}
 
+	if e.dao.child == nil {
+		c.PlainText(511, []byte("dao.child 错误"))
+		return
+	}
+
 	var n int64 = 0
 	if ismap == "1" {
 		info := map[string]interface{}{}
@@ -178,7 +188,7 @@ func (e *CloudApi) update(c *macaron.Context) {
 			n, err = e.dao.Update(info, id)
 		}
 	} else {
-		info := e.dao.GetModel()
+		info := e.dao.child.GetModel()
 		err = json.Unmarshal([]byte(beans), info)
 		if err == nil {
 			n, err = e.dao.Update(info, id)

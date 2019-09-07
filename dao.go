@@ -1,15 +1,19 @@
 package gocloud
 
 import (
+	"errors"
 	"github.com/xormplus/xorm"
 	"reflect"
 )
 
+type IDao interface {
+	GetModel() interface{}
+	GetModels() interface{}
+}
 type Dao struct {
-	db        *xorm.Engine
-	TempName  string
-	GetModel  func() interface{}
-	GetModels func() interface{}
+	db       *xorm.Engine
+	child    IDao
+	tempName string
 }
 
 type Page struct {
@@ -20,6 +24,10 @@ type Page struct {
 	Total int64
 }
 
+func (c *Dao) Init(tmpName string, child IDao) {
+	c.child = child
+	c.tempName = tmpName
+}
 func (c *Dao) SetDb(e *xorm.Engine) {
 	c.db = e
 }
@@ -30,11 +38,11 @@ func (c *Dao) getDb() *xorm.Engine {
 	return Db
 }
 func (c *Dao) FindOne(pars *map[string]interface{}) interface{} {
-	if c.GetModel == nil {
-		panic("not override GetModel")
+	if c.child == nil {
+		return nil
 	}
-	m := c.GetModel()
-	has, err := c.getDb().SqlTemplateClient(c.TempName, pars).Get(m)
+	m := c.child.GetModel()
+	has, err := c.getDb().SqlTemplateClient(c.tempName, pars).Get(m)
 	if err != nil {
 		println(err.Error())
 		return nil
@@ -52,10 +60,10 @@ func (c *Dao) FindID(id int64) interface{} {
 	return c.FindOne(&map[string]interface{}{"id": id})
 }
 func (c *Dao) DelId(id int64) (int64, error) {
-	if c.GetModel == nil {
-		panic("not override GetModel")
+	if c.child == nil {
+		return 0, errors.New("child is nil")
 	}
-	m := c.GetModel()
+	m := c.child.GetModel()
 	s := reflect.ValueOf(m).Elem()
 	v := reflect.ValueOf(id)
 	s.FieldByName("Id").Set(v)
@@ -72,14 +80,11 @@ func (c *Dao) DelIds(ids []int64) int64 {
 	return ln
 }
 func (c *Dao) FindList(pars *map[string]interface{}) interface{} {
-	if c.GetModel == nil {
-		panic("not override GetModel")
+	if c.child == nil {
+		return nil
 	}
-	if c.GetModels == nil {
-		panic("not override GetModels")
-	}
-	m := c.GetModels()
-	err := c.getDb().SqlTemplateClient(c.TempName, pars).Find(m)
+	m := c.child.GetModels()
+	err := c.getDb().SqlTemplateClient(c.tempName, pars).Find(m)
 
 	if err != nil {
 		println(err.Error())
@@ -89,12 +94,12 @@ func (c *Dao) FindList(pars *map[string]interface{}) interface{} {
 }
 
 func (c *Dao) FindCount(pars *map[string]interface{}) int64 {
-	if c.GetModel == nil {
-		panic("not override GetModel")
+	if c.child == nil {
+		return 0
 	}
 	ret := int64(0)
 	(*pars)["getCount"] = 1
-	ok, err := c.getDb().SqlTemplateClient(c.TempName, pars).Get(&ret)
+	ok, err := c.getDb().SqlTemplateClient(c.tempName, pars).Get(&ret)
 	if err != nil {
 		println(err.Error())
 		return 0
@@ -106,13 +111,10 @@ func (c *Dao) FindCount(pars *map[string]interface{}) int64 {
 }
 
 func (c *Dao) FindPage(pars *map[string]interface{}, page int64, size interface{}) *Page {
-	if c.GetModel == nil {
-		panic("not override GetModel")
+	if c.child == nil {
+		return nil
 	}
-	if c.GetModels == nil {
-		panic("not override GetModels")
-	}
-	m := c.GetModels()
+	m := c.child.GetModels()
 	var pageno int64 = 1
 	var sizeno int64 = 10
 	var pagesno int64 = 0
@@ -131,7 +133,7 @@ func (c *Dao) FindPage(pars *map[string]interface{}, page int64, size interface{
 		}
 	}
 	start := (pageno - 1) * sizeno
-	err := c.getDb().SqlTemplateClient(c.TempName, pars).Limit(int(sizeno), int(start)).Find(m)
+	err := c.getDb().SqlTemplateClient(c.tempName, pars).Limit(int(sizeno), int(start)).Find(m)
 	if err != nil {
 		println(err.Error())
 		return nil
@@ -153,11 +155,22 @@ func (c *Dao) FindPage(pars *map[string]interface{}, page int64, size interface{
 }
 
 func (c *Dao) Insert(bean interface{}) (int64, error) {
-	return c.getDb().Table(c.GetModel()).Insert(bean)
+	if c.child == nil {
+		return 0, errors.New("child is nil")
+	}
+
+	return c.getDb().Table(c.child.GetModel()).Insert(bean)
 }
 func (c *Dao) Update(bean interface{}, id interface{}) (int64, error) {
-	//session:=c.getDb().Table(c.GetModel())
-	//session.Cols(cls)
-	return c.getDb().Table(c.GetModel()).Where("id=?", id).Update(bean)
+	if c.child == nil {
+		return 0, errors.New("child is nil")
+	}
+	return c.getDb().Table(c.child.GetModel()).Where("id=?", id).Update(bean)
 	//return c.getDb().Table(c.GetModel()).ID(id).Update(bean)
+}
+func (c *Dao) GetTable() *xorm.Session {
+	if c.child == nil {
+		return nil
+	}
+	return c.getDb().Table(c.child.GetModel())
 }
