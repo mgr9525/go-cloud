@@ -27,10 +27,11 @@ func IndexHandler(c *macaron.Context, contJSON gocloud.ContJSON) {
 		fmt.Printf("users:%v\n", usrs)
 		c.Data["User"] = usr
 
-		plist := dao.UserDao.FindList(gocloud.NewParamMap())
+		par := gocloud.GetNewMaps()
+		plist := dao.UserDao.FindList(&par)
 		list := *(plist.(*[]models.User))
 		fmt.Printf("userList:%v\nlist[0].Name=%s\n", list, list[0].Name)
-		pPage := dao.UserDao.FindPage(gocloud.NewParamMap(), 1, nil)
+		pPage := dao.UserDao.FindPage(&par, 1, nil)
 		pageList := *(pPage.List.(*[]models.User))
 		fmt.Printf("pPage:%v\n", pPage)
 		fmt.Printf("pageList:%v\n", pageList)
