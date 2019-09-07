@@ -20,9 +20,13 @@ case "$1" in
         ;;
 
     stop)
+        if [ ! -e "$SERVICE_DIR/$PID" ];then
+            echo "*** PID file not found"
+            return
+        fi
         PIDS=`cat $SERVICE_DIR/$PID`
-
         if [ "$PIDS" = "" ];then
+            echo "*** PID file is emtpy"
             return
         fi
 
@@ -41,6 +45,7 @@ case "$1" in
             echo "=== $SERVICE_NAME process pid is:$PIDS"
             echo "=== begin kill $SERVICE_NAME process, pid is:$PIDS"
             kill -9 $PIDS
+            sleep 1
         fi
         ;;
 
