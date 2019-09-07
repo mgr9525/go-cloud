@@ -7,18 +7,19 @@ import (
 
 func newUserDao() *userDao {
 	e := new(userDao)
-	e.TempName = "user.dao.stpl"
-	e.GetModel = func() interface{} {
-		return new(models.User)
-	}
-	e.GetModels = func() interface{} {
-		return &[]models.User{}
-	}
+	e.Init("user.dao.stpl", e)
 	return e
 }
 
 type userDao struct {
 	gocloud.Dao
+}
+
+func (e *userDao) GetModel() interface{} {
+	return new(models.User)
+}
+func (e *userDao) GetModels() interface{} {
+	return &[]models.User{}
 }
 
 func (e *userDao) FindID(id int64) *models.User {
