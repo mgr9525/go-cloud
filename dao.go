@@ -158,6 +158,7 @@ func (c *Dao) Insert(bean interface{}) (int64, error) {
 	if c.child == nil {
 		return 0, errors.New("child is nil")
 	}
+
 	return c.getDb().Table(c.child.GetModel()).Insert(bean)
 }
 func (c *Dao) Update(bean interface{}, id interface{}) (int64, error) {
@@ -166,4 +167,10 @@ func (c *Dao) Update(bean interface{}, id interface{}) (int64, error) {
 	}
 	return c.getDb().Table(c.child.GetModel()).Where("id=?", id).Update(bean)
 	//return c.getDb().Table(c.GetModel()).ID(id).Update(bean)
+}
+func (c *Dao) GetTable() *xorm.Session {
+	if c.child == nil {
+		return nil
+	}
+	return c.getDb().Table(c.child.GetModel())
 }
