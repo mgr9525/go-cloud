@@ -21,15 +21,11 @@ func IndexHandler(c *macaron.Context, contJSON gocloud.ContJSON) {
 	})
 
 	if gocloud.Db != nil {
-		usr := dao.GetUserById(1)
+		usr := dao.UserDao.FindID(1)
 		fmt.Printf("user:%v\n", usr)
 		usrs := dao.UserDao.FindOne(&map[string]interface{}{"name": "root"})
 		fmt.Printf("users:%v\n", usrs)
-		c.Data["User"] = usrs
-
-		//test
-		usrt := dao.FindUser(&map[string]interface{}{"nick": "管理员"})
-		fmt.Printf("usert:%v\n", usrt)
+		c.Data["User"] = usr
 
 		plist := dao.UserDao.FindList(gocloud.NewParamMap())
 		list := *(plist.(*[]models.User))

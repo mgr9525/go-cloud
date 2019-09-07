@@ -6,8 +6,9 @@ import (
 )
 
 type Dao struct {
-	db        *xorm.Engine
-	TempName  string
+	db       *xorm.Engine
+	tempName string
+
 	GetModel  func() interface{}
 	GetModels func() interface{}
 }
@@ -29,12 +30,12 @@ func (c *Dao) getDb() *xorm.Engine {
 	}
 	return Db
 }
+func (c *Dao) SetTempName(s string) {
+	c.tempName = s
+}
 func (c *Dao) FindOne(pars *map[string]interface{}) interface{} {
-	if c.GetModel == nil {
-		panic("not override GetModel")
-	}
 	m := c.GetModel()
-	has, err := c.getDb().SqlTemplateClient(c.TempName, pars).Get(m)
+	has, err := c.getDb().SqlTemplateClient(c.tempName, pars).Get(m)
 	if err != nil {
 		println(err.Error())
 		return nil
@@ -79,7 +80,7 @@ func (c *Dao) FindList(pars *map[string]interface{}) interface{} {
 		panic("not override GetModels")
 	}
 	m := c.GetModels()
-	err := c.getDb().SqlTemplateClient(c.TempName, pars).Find(m)
+	err := c.getDb().SqlTemplateClient(c.tempName, pars).Find(m)
 
 	if err != nil {
 		println(err.Error())
@@ -94,7 +95,7 @@ func (c *Dao) FindCount(pars *map[string]interface{}) int64 {
 	}
 	ret := int64(0)
 	(*pars)["getCount"] = 1
-	ok, err := c.getDb().SqlTemplateClient(c.TempName, pars).Get(&ret)
+	ok, err := c.getDb().SqlTemplateClient(c.tempName, pars).Get(&ret)
 	if err != nil {
 		println(err.Error())
 		return 0
@@ -131,7 +132,7 @@ func (c *Dao) FindPage(pars *map[string]interface{}, page int64, size interface{
 		}
 	}
 	start := (pageno - 1) * sizeno
-	err := c.getDb().SqlTemplateClient(c.TempName, pars).Limit(int(sizeno), int(start)).Find(m)
+	err := c.getDb().SqlTemplateClient(c.tempName, pars).Limit(int(sizeno), int(start)).Find(m)
 	if err != nil {
 		println(err.Error())
 		return nil
