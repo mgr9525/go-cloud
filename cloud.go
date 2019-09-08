@@ -118,5 +118,5 @@ func runMids(funcMap []template.FuncMap) {
 		Web.Use(cache.Cacher(opt))
 	}
 
-	Web.Use(CheckContJson)
+	Web.Use(checkContJson)
 }

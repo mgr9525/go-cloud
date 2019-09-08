@@ -61,7 +61,7 @@ func getContJson(c *macaron.Context) (cjs ContJSON, rterr error) {
 	}
 	return pars, nil
 }
-func CheckContJson(c *macaron.Context) {
+func checkContJson(c *macaron.Context) {
 	cont, _ := getContJson(c)
 	c.Set(reflect.TypeOf(cont), reflect.ValueOf(cont))
 }
