@@ -84,7 +84,7 @@ func (e ContJSON) GetString(key string) string {
 	return fmt.Sprint(e[key])
 }
 
-func (e ContJSON) GetInt(key string) (int, error) {
+func (e ContJSON) GetInt(key string) (int64, error) {
 	if e[key] == nil {
 		return 0, errors.New("not found")
 	}
@@ -92,15 +92,15 @@ func (e ContJSON) GetInt(key string) (int, error) {
 	v := e[key]
 	switch v.(type) {
 	case int:
-		return v.(int), nil
+		return v.(int64), nil
 	case string:
-		return strconv.Atoi(v.(string))
+		return strconv.ParseInt(v.(string), 10, 64)
 	case int64:
-		return int(v.(int64)), nil
+		return v.(int64), nil
 	case float32:
-		return int(v.(float32)), nil
+		return int64(v.(float32)), nil
 	case float64:
-		return int(v.(float64)), nil
+		return int64(v.(float64)), nil
 	}
 	return 0, errors.New("not found")
 }
