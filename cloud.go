@@ -84,6 +84,7 @@ func RunApp(ymlpath string, consRt func(), consfun func() []template.FuncMap) {
 }
 
 func runMids(funcMap []template.FuncMap) {
+	Web.Use(checkContJson) //contJSON 解析
 	Web.Use(macaron.Logger())
 	if CloudConf.Web.Gzip {
 		Web.Use(gzip.Gziper())
@@ -117,6 +118,4 @@ func runMids(funcMap []template.FuncMap) {
 		}
 		Web.Use(cache.Cacher(opt))
 	}
-
-	Web.Use(checkContJson)
 }
