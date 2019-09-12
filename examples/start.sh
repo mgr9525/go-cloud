@@ -22,8 +22,10 @@ case "$1" in
         ;;
 
     stop)
+        if [ ! -e "$SERVICE_DIR/$PID_FILE" ];then
+          return
+        fi
         PID=`cat $SERVICE_DIR/$PID_FILE`
-
         if [ -z "$PID" ];then
             return
         fi
