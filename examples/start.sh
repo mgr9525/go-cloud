@@ -5,9 +5,11 @@
 SERVICE_DIR=/home/user/go/bin/
 ## 服务名称
 SERVICE_NAME=main
-PID=$SERVICE_NAME\.pid
+
+
 
 cd $SERVICE_DIR
+PID_FILE=$SERVICE_NAME\.pid
 
 case "$1" in
 
@@ -15,37 +17,38 @@ case "$1" in
         ##nohup &  以守护进程启动
         #nohup ./$SERVICE_NAME >/dev/null 2>&1 &
         nohup ./$SERVICE_NAME >/dev/null 2>&1 &
-        echo $! > $SERVICE_DIR/$PID
+        echo $! > $SERVICE_DIR/$PID_FILE
         echo "=== start $SERVICE_NAME"
         ;;
 
     stop)
-        if [ ! -e "$SERVICE_DIR/$PID" ];then
-            echo "*** PID file not found"
-            return
-        fi
-        PIDS=`cat $SERVICE_DIR/$PID`
-        if [ "$PIDS" = "" ];then
-            echo "*** PID file is emtpy"
+        PID=`cat $SERVICE_DIR/$PID_FILE`
+
+        if [ -z "$PID" ];then
             return
         fi
 
-        kill $PIDS
-        rm -rf $SERVICE_DIR/$PID
-        echo "=== stop $SERVICE_NAME:$PIDS"
+        PIDS=`ps -aux  | awk '{print $2}' | grep "$PID"`
+        if [ -z "$PIDS" ]; then
+            echo "=== $SERVICE_NAME process not exists or stop success"
+        else
+            echo "=== stop $SERVICE_NAME:$PID"
+            kill $PID
+        fi
+
+        rm -rf $SERVICE_DIR/$PID_FILE
 
         ## 停止5秒
         sleep 1
         ##
-        PIDS=`ps -aux  | awk '{print $2}' | grep "$PIDS"`
-        ## ubuntu dash == upto =
-        if [ "$PIDS" = "" ]; then
+        PIDS=`ps -aux  | awk '{print $2}' | grep "$PID"`
+
+        if [ -z "$PIDS" ]; then
             echo "=== $SERVICE_NAME process not exists or stop success"
         else
             echo "=== $SERVICE_NAME process pid is:$PIDS"
             echo "=== begin kill $SERVICE_NAME process, pid is:$PIDS"
             kill -9 $PIDS
-            sleep 1
         fi
         ;;
 
