@@ -39,7 +39,7 @@ case "$1" in
         rm -rf $SERVICE_DIR/$PID_FILE
 
         ## 停止5秒
-        sleep 1
+        sleep 2
         ##
         PIDS=`ps -aux  | awk '{print $2}' | grep "$PID"`
 
