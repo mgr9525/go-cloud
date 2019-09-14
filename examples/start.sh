@@ -1,73 +1,91 @@
-#!/bin/sh
+#!/bin/bash
+ 
+#这里可替换为你自己的执行程序，其他代码无需更改
 
-## service name
-## 服务所在目录
-SERVICE_DIR=/home/user/go/bin/
-## 服务名称
-SERVICE_NAME=main
+APP_PATH=/home/user/go/bin/
+APP_NAME="$APP_PATH/main"
 
+cd $APP_PATH
 
-
-cd $SERVICE_DIR
-PID_FILE=$SERVICE_NAME\.pid
-
+#使用说明，用来提示输入参数
+usage() {
+    echo "Usage: sh [start|stop|restart|status]"
+    exit 1
+}
+ 
+#检查程序是否在运行
+is_exist(){
+  pid=`ps -ef|grep $APP_NAME|grep -v grep|awk '{print $2}'`
+  #如果不存在返回1，存在返回0     
+  if [ -z "${pid}" ]; then
+   return 1
+  else
+    return 0
+  fi
+}
+ 
+#启动方法
+start(){
+  is_exist
+  if [ $? -eq 0 ]; then
+    echo "${APP_NAME} is already running. pid=${pid}"
+  else
+    nohup ${APP_NAME}  > /dev/null 2>&1 &
+    echo "run ${APP_NAME}."
+  fi
+}
+ 
+#停止方法
+stop(){
+  is_exist
+  if [ $? -eq "0" ]; then
+    kill $pid
+    echo "try kill ${APP_NAME}. pid=${pid}"
+    sleep 2s
+    is_exist
+    if [ $? -eq "0" ]; then
+      kill -9 $pid
+      echo "Skill kill ${APP_NAME}. pid=${pid}"
+    else
+      echo "${APP_NAME} is killed"
+    fi
+  else
+    echo "${APP_NAME} is not running"
+  fi
+}
+ 
+#输出运行状态
+status(){
+  is_exist
+  if [ $? -eq "0" ]; then
+    echo "${APP_NAME} is running. Pid is ${pid}"
+  else
+    echo "${APP_NAME} is NOT running."
+  fi
+}
+ 
+#重启
+restart(){
+  stop
+  sleep 5
+  start
+}
+ 
+#根据输入参数，选择执行对应方法，不输入则执行使用说明
 case "$1" in
-
-    start)
-        ##nohup &  以守护进程启动
-        #nohup ./$SERVICE_NAME >/dev/null 2>&1 &
-        nohup ./$SERVICE_NAME >/dev/null 2>&1 &
-        echo $! > $SERVICE_DIR/$PID_FILE
-        echo "=== start $SERVICE_NAME"
-        ;;
-
-    stop)
-        if [ ! -e "$SERVICE_DIR/$PID_FILE" ];then
-          return
-        fi
-        PID=`cat $SERVICE_DIR/$PID_FILE`
-        if [ -z "$PID" ];then
-            return
-        fi
-
-        PIDS=`ps -aux  | awk '{print $2}' | grep "$PID"`
-        if [ -z "$PIDS" ]; then
-            echo "=== $SERVICE_NAME process not exists or stop success"
-        else
-            echo "=== stop $SERVICE_NAME:$PID"
-            kill $PID
-        fi
-
-        rm -rf $SERVICE_DIR/$PID_FILE
-
-        ## 停止5秒
-        sleep 2
-        ##
-        PIDS=`ps -aux  | awk '{print $2}' | grep "$PID"`
-
-        if [ -z "$PIDS" ]; then
-            echo "=== $SERVICE_NAME process not exists or stop success"
-        else
-            echo "=== $SERVICE_NAME process pid is:$PIDS"
-            echo "=== begin kill $SERVICE_NAME process, pid is:$PIDS"
-            kill -9 $PIDS
-        fi
-        ;;
-
-    restart)
-        $0 stop
-        sleep 2
-        $0 start
-        echo "=== restart $SERVICE_NAME"
-        ;;
-
-    *)
-        ## restart
-        $0 stop
-        sleep 2
-        $0 start
-        ;;
-
+  "start")
+    start
+    ;;
+  "stop")
+    stop
+    ;;
+  "status")
+    status
+    ;;
+  "restart")
+    restart
+    ;;
+  *)
+    usage
+    ;;
 esac
-exit 0
-
