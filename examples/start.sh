@@ -2,7 +2,7 @@
  
 #这里可替换为你自己的执行程序，其他代码无需更改
 
-APP_PATH=/home/user/go/bin/
+APP_PATH=/home/user/go/bin
 APP_NAME="$APP_PATH/main"
 
 cd $APP_PATH
