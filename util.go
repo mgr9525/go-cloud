@@ -16,7 +16,7 @@ type ContJSON map[string]interface{}
 func RuisRecovers(name string, handle ErrHandle) {
 	if err := recover(); err != nil {
 		fmt.Print("ruisRecover(" + name + "):")
-		fmt.Println(err) // 这里的err其实就是panic传入的内容，55
+		fmt.Printf("%v\n", err) // 这里的err其实就是panic传入的内容，55
 		if handle != nil {
 			handle()
 		}
