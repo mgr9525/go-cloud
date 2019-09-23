@@ -1,8 +1,9 @@
 package main
 
 import (
-	"examples/routes"
 	"github.com/mgr9525/go-cloud"
+	"github.com/mgr9525/go-cloud/examples/controller"
+	"github.com/mgr9525/go-cloud/examples/routes"
 	"html/template"
 )
 
@@ -17,6 +18,7 @@ func main() {
 
 func customFun() []template.FuncMap {
 	println("constomFun")
+	gocloud.RegController(new(controller.UserController))
 	return []template.FuncMap{map[string]interface{}{
 		"AppName": func() string {
 			return "GoCloud"

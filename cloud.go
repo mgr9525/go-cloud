@@ -77,6 +77,7 @@ func RunApp(ymlpath string, consRt func(), consfun func() []template.FuncMap) {
 		}
 	}
 	runMids(funcMap)
+	runController()
 	if consRt != nil {
 		consRt()
 	}

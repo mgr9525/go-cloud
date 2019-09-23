@@ -1,8 +1,8 @@
 package dao
 
 import (
-	"examples/models"
 	"github.com/mgr9525/go-cloud"
+	"github.com/mgr9525/go-cloud/examples/models"
 )
 
 func newUserDao() *userDao {
