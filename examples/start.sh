@@ -28,7 +28,7 @@ is_exist(){
 start(){
   is_exist
   if [ $? -eq 0 ]; then
-    echo "${APP_NAME} is already running. pid=${pid}"
+    echo "${APP_NAME} is running. Pid=${pid}"
   else
     nohup ${APP_NAME}  > /dev/null 2>&1 &
     echo "run ${APP_NAME}."
@@ -58,9 +58,9 @@ stop(){
 status(){
   is_exist
   if [ $? -eq "0" ]; then
-    echo "${APP_NAME} is running. Pid is ${pid}"
+    echo "${APP_NAME} is running. Pid=${pid}"
   else
-    echo "${APP_NAME} is NOT running."
+    echo "${APP_NAME} is not running."
   fi
 }
  
