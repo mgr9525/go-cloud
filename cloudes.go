@@ -57,7 +57,7 @@ func (c *CloudExecs) execHttpJSON(path string, body interface{}) (int, []byte, e
 		host = fmt.Sprintf("http://%s:%d", service.Address, service.Port)
 	}
 	if body == nil {
-		body = &map[string]interface{}{}
+		body = map[string]interface{}{}
 	}
 
 	bts, err := json.Marshal(body)
@@ -65,7 +65,7 @@ func (c *CloudExecs) execHttpJSON(path string, body interface{}) (int, []byte, e
 		return 0, nil, err
 	}
 
-	req, err := http.NewRequest("P0ST", host+path, bytes.NewBuffer(bts))
+	req, err := http.NewRequest("POST", host+path, bytes.NewBuffer(bts))
 	if err != nil {
 		return 0, nil, err
 	}
