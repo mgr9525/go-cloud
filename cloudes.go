@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strconv"
 )
 
 type CloudExecs struct {
@@ -86,9 +87,12 @@ func (c *CloudExecs) Exec(path string, pars *url.Values) (int, string, error) {
 	return code, string(bts), nil
 }
 func (c *CloudExecs) ExecObj(path string, pars *url.Values, ret interface{}) error {
-	_, bts, err := c.execHttp(path, pars)
+	code, bts, err := c.execHttp(path, pars)
 	if err != nil {
 		return err
+	}
+	if code != 200 {
+		return errors.New("code is:" + strconv.Itoa(code))
 	}
 	err = json.Unmarshal(bts, ret)
 	if err != nil {
@@ -106,9 +110,12 @@ func (c *CloudExecs) ExecJSON(path string, pars interface{}) (int, string, error
 	return code, string(bts), nil
 }
 func (c *CloudExecs) ExecObjJSON(path string, pars interface{}, ret interface{}) error {
-	_, bts, err := c.execHttpJSON(path, pars)
+	code, bts, err := c.execHttpJSON(path, pars)
 	if err != nil {
 		return err
+	}
+	if code != 200 {
+		return errors.New("code is:" + strconv.Itoa(code))
 	}
 	err = json.Unmarshal(bts, ret)
 	if err != nil {
