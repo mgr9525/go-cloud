@@ -17,6 +17,6 @@ func runLogger() {
 		num = CloudConf.Logger.Filenum
 	}
 	logger.SetRollingFile(dir, name, int32(num), int64(sz), logger.MB)
-	logger.SetLevel(logger.INFO)
+	//logger.SetLevel(logger.INFO)
 	//logger.Debug("logger start:",time.Now())
 }

@@ -18,7 +18,6 @@ func main() {
 
 func customFun() []template.FuncMap {
 	println("constomFun")
-	gocloud.RegController(new(controller.UserController))
 	return []template.FuncMap{map[string]interface{}{
 		"AppName": func() string {
 			return "GoCloud"
@@ -29,5 +28,6 @@ func customFun() []template.FuncMap {
 	}}
 }
 func constomRoute() {
+	gocloud.RegController(new(controller.UserController))
 	gocloud.Web.Any("/", routes.IndexHandler)
 }
