@@ -1,15 +1,22 @@
 package gocloud
 
 import (
-	"log"
-	"os"
+	"github.com/donnie4w/go-logger/logger"
+	"path/filepath"
 )
 
 func runLogger() {
-	logfl, err := os.OpenFile(CloudConf.Logger.Path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err != nil {
-		log.Println("Failed to open error log file:", err)
-		return
+	dir := filepath.Dir(CloudConf.Logger.Path)
+	name := filepath.Base(CloudConf.Logger.Path)
+	sz := 1
+	num := 10
+	if CloudConf.Logger.Filesize > 0 {
+		sz = CloudConf.Logger.Filesize
 	}
-	Logger = log.New(logfl, CloudConf.Logger.Prefix, log.Ltime|log.Lshortfile)
+	if CloudConf.Logger.Filenum > 0 {
+		num = CloudConf.Logger.Filenum
+	}
+	logger.SetRollingFile(dir, name, int32(num), int64(sz), logger.MB)
+	logger.SetLevel(logger.INFO)
+	//logger.Debug("logger start:",time.Now())
 }

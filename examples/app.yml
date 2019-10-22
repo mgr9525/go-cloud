@@ -13,7 +13,8 @@ cache:
 logger:
   enable: true
   path: run.log
-  prefix: ruis-
+  filesize: 5
+  filenum: 5
 token:
   enable: true
   httponly: false
@@ -21,10 +22,6 @@ token:
   key:  LQ6A4Y1R3KOB9D4JX593MGW44QMJ1LNC
   path: /
   #domain:
-db:
-  enable: true
-  driver: mysql
-  url: root:root@tcp(localhost:3306)/test?charset=utf8
 consul:
   enable: false
   #host: localhost
@@ -33,6 +30,12 @@ consul:
   name: go-cloud
   reghost: localhost
   #tags: [123,345,654]
-mongo:
-  enable: false
-  url: mongodb://root:123456@localhost/test
+datasorce:
+  main:
+    enable: true
+    driver: mysql
+    url: root:root@tcp(localhost:3306)/test?charset=utf8
+  mongo:
+    enable: true
+    driver: mongo
+    url: mongodb://root:123456@localhost/test

@@ -9,14 +9,14 @@ import (
 var CloudConf = cloudConfig{}
 
 type cloudConfig struct {
-	Server serverConfig
-	Consul consulConfig
-	Web    webConfig
-	Cache  cacheConfig
-	Logger loggerConfig
-	Db     dbConfig
-	Mongo  mongoConfig
-	Token  tokenConfig
+	Server    serverConfig
+	Consul    consulConfig
+	Web       webConfig
+	Cache     cacheConfig
+	Logger    loggerConfig
+	Token     tokenConfig
+	Datasorce map[string]dbConfig
+	Custom    map[string]interface{}
 }
 type serverConfig struct {
 	Name string
@@ -43,19 +43,16 @@ type cacheConfig struct {
 	Configs  string
 }
 type loggerConfig struct {
-	Enable bool
-	Path   string
-	Prefix string
+	Enable   bool
+	Path     string
+	Filesize int
+	Filenum  int
 }
 type dbConfig struct {
 	Enable bool
 	Driver string
 	Url    string
 	Tlpath string
-}
-type mongoConfig struct {
-	Enable bool
-	Url    string
 }
 type tokenConfig struct {
 	Enable   bool

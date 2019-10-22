@@ -11,12 +11,12 @@ import (
 	"strconv"
 )
 
-type CloudExecs struct {
+type CloudExec struct {
 	Serv string
 	Host string
 }
 
-func (c *CloudExecs) execHttp(path string, data *url.Values) (int, []byte, error) {
+func (c *CloudExec) execHttp(path string, data *url.Values) (int, []byte, error) {
 	host := c.Host
 	if len(host) <= 0 && len(c.Serv) > 0 && Consul != nil {
 		services, err := Consul.Agent().Services()
@@ -43,7 +43,7 @@ func (c *CloudExecs) execHttp(path string, data *url.Values) (int, []byte, error
 	}
 	return res.StatusCode, bts, nil
 }
-func (c *CloudExecs) execHttpJSON(path string, body interface{}) (int, []byte, error) {
+func (c *CloudExec) execHttpJSON(path string, body interface{}) (int, []byte, error) {
 	host := c.Host
 	if len(host) <= 0 && len(c.Serv) > 0 && Consul != nil {
 		services, err := Consul.Agent().Services()
@@ -79,14 +79,14 @@ func (c *CloudExecs) execHttpJSON(path string, body interface{}) (int, []byte, e
 	return res.StatusCode, byts, nil
 }
 
-func (c *CloudExecs) Exec(path string, pars *url.Values) (int, string, error) {
+func (c *CloudExec) Exec(path string, pars *url.Values) (int, string, error) {
 	code, bts, err := c.execHttp(path, pars)
 	if err != nil {
 		return code, "", err
 	}
 	return code, string(bts), nil
 }
-func (c *CloudExecs) ExecObj(path string, pars *url.Values, ret interface{}) error {
+func (c *CloudExec) ExecObj(path string, pars *url.Values, ret interface{}) error {
 	code, bts, err := c.execHttp(path, pars)
 	if err != nil {
 		return err
@@ -102,14 +102,14 @@ func (c *CloudExecs) ExecObj(path string, pars *url.Values, ret interface{}) err
 	return nil
 }
 
-func (c *CloudExecs) ExecJSON(path string, pars interface{}) (int, string, error) {
+func (c *CloudExec) ExecJSON(path string, pars interface{}) (int, string, error) {
 	code, bts, err := c.execHttpJSON(path, pars)
 	if err != nil {
 		return code, "", err
 	}
 	return code, string(bts), nil
 }
-func (c *CloudExecs) ExecObjJSON(path string, pars interface{}, ret interface{}) error {
+func (c *CloudExec) ExecObjJSON(path string, pars interface{}, ret interface{}) error {
 	code, bts, err := c.execHttpJSON(path, pars)
 	if err != nil {
 		return err

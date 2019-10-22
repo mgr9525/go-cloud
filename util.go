@@ -59,6 +59,7 @@ func getContJson(c *macaron.Context) (cjs ContJSON, rterr error) {
 	if err != nil {
 		return ContJSON{}, err
 	}
+	c.Data["bytes"] = bts
 	return pars, nil
 }
 func checkContJson(c *macaron.Context) {

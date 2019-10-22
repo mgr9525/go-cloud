@@ -1,24 +1,22 @@
 package gocloud
 
 import (
-	"encoding/gob"
 	"github.com/go-macaron/cache"
 	"github.com/go-macaron/gzip"
 	"github.com/go-macaron/pongo2"
+	consulapi "github.com/hashicorp/consul/api"
 	"gopkg.in/macaron.v1"
 	"gopkg.in/yaml.v2"
 	"html/template"
 	"io/ioutil"
-	"log"
-	"time"
 )
 
-func inits() {
-	gob.Register(time.Time{})
-	gob.Register(map[string]interface{}{})
-}
+var (
+	Web    *macaron.Macaron
+	Consul *consulapi.Client
+)
+
 func RunApp(ymlpath string, consRt func(), consfun func() []template.FuncMap) {
-	inits()
 	cfgs := "app.yml"
 	if len(ymlpath) > 0 {
 		cfgs = ymlpath
@@ -48,17 +46,9 @@ func RunApp(ymlpath string, consRt func(), consfun func() []template.FuncMap) {
 
 	if CloudConf.Logger.Enable && CloudConf.Logger.Path != "" {
 		runLogger()
-	} else {
-		Logger = &log.Logger{}
 	}
 	if CloudConf.Consul.Enable && CloudConf.Consul.Id != "" && CloudConf.Consul.Name != "" {
 		runConsul(host, port)
-	}
-	if CloudConf.Db.Enable && CloudConf.Db.Driver != "" && CloudConf.Db.Url != "" {
-		runDb()
-	}
-	if CloudConf.Mongo.Enable && CloudConf.Mongo.Url != "" {
-		runMongo()
 	}
 
 	funcMap := []template.FuncMap{map[string]interface{}{
