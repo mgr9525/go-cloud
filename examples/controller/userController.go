@@ -13,8 +13,8 @@ func (e *UserController) GetPath() string {
 func (e *UserController) Routes() {
 	gocloud.Web.Any("/test", e.test)
 }
-func (e *UserController) Mid() macaron.Handler {
-	return gocloud.AccessAllowFun
+func (e *UserController) Mid() []macaron.Handler {
+	return []macaron.Handler{gocloud.AccessAllowFun}
 }
 
 func (e *UserController) test(c *macaron.Context) {
