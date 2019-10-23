@@ -7,7 +7,7 @@ var mapController = make([]IController, 0)
 type IController interface {
 	GetPath() string
 	Routes()
-	Mid() macaron.Handler
+	Mid() []macaron.Handler
 }
 
 /*type Controller struct {
@@ -42,7 +42,7 @@ func runController() {
 		if mid == nil {
 			Web.Group(v.GetPath(), hld)
 		} else {
-			Web.Group(v.GetPath(), hld, mid)
+			Web.Group(v.GetPath(), hld, mid...)
 		}
 	}
 }
