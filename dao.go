@@ -5,7 +5,7 @@ import (
 )
 
 type Dao struct {
-	db       *xorm.Engine
+	db       **xorm.Engine
 	tempName string
 }
 
@@ -17,19 +17,19 @@ type Page struct {
 	Data  interface{}
 }
 
-func NewDao(d *xorm.Engine, tmpName string) *Dao {
+func NewDao(d **xorm.Engine, tmpName string) *Dao {
 	e := new(Dao)
 	e.db = d
 	e.tempName = tmpName
 	return e
 }
 
-func (c *Dao) SetDb(e *xorm.Engine) {
+func (c *Dao) SetDb(e **xorm.Engine) {
 	c.db = e
 }
 func (c *Dao) getDb() *xorm.Engine {
 	if c.db != nil {
-		return c.db
+		return *c.db
 	}
 	return nil
 }
