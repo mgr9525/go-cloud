@@ -82,9 +82,10 @@ func (c *Dao) FindPage(ls interface{}, pars *map[string]interface{}, page int64,
 		pagesno = pagest
 	}
 	return &Page{
-		Page:  page,
+		Page:  pageno,
 		Pages: pagesno,
 		Size:  sizeno,
 		Total: count,
+		Data:  ls,
 	}
 }
