@@ -14,6 +14,7 @@ type Page struct {
 	Size  int64
 	Pages int64
 	Total int64
+	Data  interface{}
 }
 
 func NewDao(d *xorm.Engine, tmpName string) *Dao {
