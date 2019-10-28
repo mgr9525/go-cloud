@@ -77,9 +77,9 @@ func RunApp(ymlpath string, consRt func(), consfun func() []template.FuncMap) {
 func runMids(funcMap []template.FuncMap) {
 	Web.Use(checkContJson) //contJSON 解析
 	Web.Use(macaron.Logger())
+	Web.Use(macaron.Static("static"))
 	if CloudConf.Web.Gzip {
 		Web.Use(gzip.Gziper())
-		Web.Use(macaron.Static("static"))
 	}
 	if CloudConf.Web.Template == "pongo2" {
 		Web.Use(pongo2.Pongoer(pongo2.Options{
