@@ -42,6 +42,7 @@ func (c *DaoMgo) GetSession() *mongo {
 		rt := new(mongo)
 		rt.ses = (*c.db).Clone()
 		rt.db = rt.ses.DB(c.dbName)
+		rt.cName = c.cNmae
 		return rt
 	}
 	return nil
