@@ -8,6 +8,7 @@ import (
 type DaoMgo struct {
 	db     **mgo.Session
 	dbName string
+	cNmae  string
 }
 type mongo struct {
 	ses   *mgo.Session
@@ -15,32 +16,32 @@ type mongo struct {
 	cName string
 }
 
-func NewDaoMgo(d **mgo.Session, name string) *DaoMgo {
+func NewDaoMgo(d **mgo.Session, dname string, cname string) *DaoMgo {
 	e := new(DaoMgo)
 	e.db = d
-	e.dbName = name
+	e.dbName = dname
+	e.cNmae = cname
 	return e
 }
 
 func (c *DaoMgo) SetDb(e **mgo.Session) {
 	c.db = e
 }
-func (c *DaoMgo) CSession(name string) *mongo {
+func (c *DaoMgo) CSession() *mongo {
 	if c.db != nil {
 		rt := new(mongo)
 		rt.ses = *c.db
 		rt.db = rt.ses.DB(c.dbName)
-		rt.cName = name
+		rt.cName = c.cNmae
 		return rt
 	}
 	return nil
 }
-func (c *DaoMgo) GetSession(name string) *mongo {
+func (c *DaoMgo) GetSession() *mongo {
 	if c.db != nil {
 		rt := new(mongo)
 		rt.ses = (*c.db).Clone()
 		rt.db = rt.ses.DB(c.dbName)
-		rt.cName = name
 		return rt
 	}
 	return nil
