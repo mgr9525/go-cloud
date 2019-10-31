@@ -25,6 +25,16 @@ func NewDaoMgo(d **mgo.Session, name string) *DaoMgo {
 func (c *DaoMgo) SetDb(e **mgo.Session) {
 	c.db = e
 }
+func (c *DaoMgo) CSession(name string) *mongo {
+	if c.db != nil {
+		rt := new(mongo)
+		rt.ses = *c.db
+		rt.db = rt.ses.DB(c.dbName)
+		rt.cName = name
+		return rt
+	}
+	return nil
+}
 func (c *DaoMgo) GetSession(name string) *mongo {
 	if c.db != nil {
 		rt := new(mongo)
