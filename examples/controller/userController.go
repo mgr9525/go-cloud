@@ -17,6 +17,6 @@ func (e *UserController) Mid() []macaron.Handler {
 	return []macaron.Handler{gocloud.AccessAllowFun}
 }
 
-func (e *UserController) test(c *macaron.Context) {
+func (UserController) test(c *macaron.Context) {
 	c.PlainText(200, []byte("test:"+c.Query("n")))
 }
