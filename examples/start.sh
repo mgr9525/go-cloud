@@ -41,7 +41,7 @@ stop(){
   if [ $? -eq "0" ]; then
     kill $pid
     echo "try kill ${APP_NAME}. pid=${pid}"
-    sleep 2s
+    sleep 1s
     is_exist
     if [ $? -eq "0" ]; then
       kill -9 $pid
