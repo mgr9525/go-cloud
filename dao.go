@@ -1,7 +1,9 @@
 package gocloud
 
 import (
+	"errors"
 	"github.com/xormplus/xorm"
+	"reflect"
 )
 
 type Page struct {
@@ -10,6 +12,26 @@ type Page struct {
 	Pages int64
 	Total int64
 	Data  interface{}
+}
+
+func XormFindCount(ses *xorm.Session, rowsSlicePtr interface{}) (int64, error) {
+	sliceValue := reflect.Indirect(reflect.ValueOf(rowsSlicePtr))
+	if sliceValue.Kind() != reflect.Slice && sliceValue.Kind() != reflect.Map {
+		return 0, errors.New("needs a pointer to a slice or a map")
+	}
+
+	sliceElementType := sliceValue.Type().Elem()
+
+	if sliceElementType.Kind() == reflect.Ptr {
+		if sliceElementType.Elem().Kind() == reflect.Struct {
+			pv := reflect.New(sliceElementType.Elem())
+			return ses.Count(pv.Interface())
+		}
+	} else if sliceElementType.Kind() == reflect.Struct {
+		pv := reflect.New(sliceElementType)
+		return ses.Count(pv.Interface())
+	}
+	return 0, errors.New("not found table")
 }
 
 func XormFindPage(ses *xorm.Session, ls interface{}, page int64, size interface{}) (*Page, error) {
@@ -35,7 +57,7 @@ func XormFindPage(ses *xorm.Session, ls interface{}, page int64, size interface{
 	if err != nil {
 		return nil, err
 	}
-	count, err := ses.Count(ls)
+	count, err := XormFindCount(ses, ls)
 	if err != nil {
 		return nil, err
 	}
