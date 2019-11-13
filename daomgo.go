@@ -27,7 +27,7 @@ func NewDaoMgo(d **mgo.Session, dname string, cname string) *DaoMgo {
 func (c *DaoMgo) SetDb(e **mgo.Session) {
 	c.db = e
 }
-func (c *DaoMgo) CSession() *mongo {
+func (c *DaoMgo) GetSession() *mongo {
 	if c.db != nil {
 		rt := new(mongo)
 		rt.ses = *c.db
@@ -37,7 +37,7 @@ func (c *DaoMgo) CSession() *mongo {
 	}
 	return nil
 }
-func (c *DaoMgo) GetSession() *mongo {
+func (c *DaoMgo) NewSession() *mongo {
 	if c.db != nil {
 		rt := new(mongo)
 		rt.ses = (*c.db).Clone()
@@ -55,9 +55,11 @@ func (c *mongo) C() *mgo.Collection {
 	return c.db.C(c.cName)
 }
 func (c *mongo) Close() {
-	c.ses.Close()
-	c.db = nil
-	c.ses = nil
+	if c.db != nil {
+		c.ses.Close()
+		c.db = nil
+		c.ses = nil
+	}
 }
 
 func (c *mongo) FindCount(pars *bson.M) int {
