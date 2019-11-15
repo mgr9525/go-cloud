@@ -25,11 +25,11 @@ func XormFindCount(ses *xorm.Session, rowsSlicePtr interface{}) (int64, error) {
 	if sliceElementType.Kind() == reflect.Ptr {
 		if sliceElementType.Elem().Kind() == reflect.Struct {
 			pv := reflect.New(sliceElementType.Elem())
-			return ses.Count(pv.Interface())
+			return ses.Clone().Count(pv.Interface())
 		}
 	} else if sliceElementType.Kind() == reflect.Struct {
 		pv := reflect.New(sliceElementType)
-		return ses.Count(pv.Interface())
+		return ses.Clone().Count(pv.Interface())
 	}
 	return 0, errors.New("not found table")
 }
@@ -53,7 +53,7 @@ func XormFindPage(ses *xorm.Session, ls interface{}, page int64, size interface{
 		}
 	}
 	start := (pageno - 1) * sizeno
-	err := ses.Limit(int(sizeno), int(start)).Find(ls)
+	err := ses.Clone().Limit(int(sizeno), int(start)).Find(ls)
 	if err != nil {
 		return nil, err
 	}
