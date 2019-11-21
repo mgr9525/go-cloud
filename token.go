@@ -72,7 +72,7 @@ func CreateToken(p *jwt.MapClaims, tmout time.Duration) (string, error) {
 	}
 	return tokens, nil
 }
-func SetToken(c *macaron.Context, p *jwt.MapClaims, rem bool) (string, error) {
+func SetToken(c *macaron.Context, p *jwt.MapClaims, rem bool, doman ...string) (string, error) {
 	tmout := time.Hour * 5
 	if rem {
 		tmout = time.Hour * 24 * 5
@@ -87,6 +87,9 @@ func SetToken(c *macaron.Context, p *jwt.MapClaims, rem bool) (string, error) {
 	}
 	if CloudConf.Token.Domain != "" {
 		cke.Domain = CloudConf.Token.Domain
+	}
+	if len(doman) > 0 {
+		cke.Domain = doman[0]
 	}
 
 	cke.MaxAge = 60 * 60 * 5
