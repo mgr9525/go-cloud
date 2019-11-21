@@ -100,17 +100,20 @@ func SetToken(c *macaron.Context, p *jwt.MapClaims, rem bool, doman ...string) (
 	return tokens, nil
 }
 
-func ClearToken(c *macaron.Context) error {
+func ClearToken(c *macaron.Context, doman ...string) error {
 	if !CloudConf.Token.Enable || CloudConf.Token.Name == "" {
 		return errors.New("token not enable")
 	}
 
-	cke := http.Cookie{Name: CloudConf.Token.Name, HttpOnly: CloudConf.Token.Httponly}
+	cke := http.Cookie{Name: CloudConf.Token.Name, Value: "", HttpOnly: CloudConf.Token.Httponly}
 	if CloudConf.Token.Path != "" {
 		cke.Path = CloudConf.Token.Path
 	}
 	if CloudConf.Token.Domain != "" {
 		cke.Domain = CloudConf.Token.Domain
+	}
+	if len(doman) > 0 {
+		cke.Domain = doman[0]
 	}
 	cke.MaxAge = -1
 	c.Resp.Header().Set("Set-Cookie", cke.String())
