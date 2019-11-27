@@ -89,6 +89,9 @@ func (c *mongo) FindPage(ls interface{}, pars *bson.M, page int64, size interfac
 		}
 	}
 	start := (pageno - 1) * sizeno
+	if pars == nil {
+		pars = &bson.M{}
+	}
 	q := c.C().Find(pars).Skip(int(start)).Limit(int(sizeno))
 	if len(sorts) > 0 {
 		q.Sort(sorts...)
