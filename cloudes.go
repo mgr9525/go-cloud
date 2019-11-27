@@ -115,7 +115,7 @@ func (c *CloudExec) ExecObjJSON(path string, pars interface{}, ret interface{}) 
 		return err
 	}
 	if code != 200 {
-		return errors.New("code is:" + strconv.Itoa(code))
+		return errors.New(fmt.Sprintf("%d:%s", code, string(bts)))
 	}
 	err = json.Unmarshal(bts, ret)
 	if err != nil {
