@@ -68,8 +68,8 @@ func checkContJson(c *macaron.Context) {
 }
 func AccessAllowFun(c *macaron.Context) {
 	c.Resp.Header().Add("Access-Control-Allow-Origin", c.Req.Header.Get("Origin"))
-	c.Resp.Header().Add("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-	c.Resp.Header().Add("Access-Control-Allow-Headers", "DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization")
+	c.Resp.Header().Add("Access-Control-Allow-Methods", "*")
+	c.Resp.Header().Add("Access-Control-Allow-Headers", "*")
 	c.Resp.Header().Add("Access-Control-Allow-Credentials", "true")
 
 	if c.Req.Method == "OPTIONS" {
