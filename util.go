@@ -45,23 +45,23 @@ func ClearHTML(src string) string {
 	return rets
 }
 
-func getContJson(c *macaron.Context) (cjs *ContJSON, rterr error) {
+func getContJson(c *macaron.Context) (cjs ContJSON, rterr error) {
 	defer RuisRecovers("getContJson", func() {
 		rterr = errors.New("logic error")
 	})
-	rets := new(ContJSON)
+	rets := ContJSON{}
 	contp := c.Req.Header.Get("Content-Type")
 	if !strings.HasPrefix(contp, "application/json") {
-		return nil, errors.New("content not json")
+		return rets, errors.New("content not json")
 	}
 	bts, err := c.Req.Body().Bytes()
 	if err != nil {
-		return nil, err
+		return rets, err
 	}
 	rets.Data = bts
 	err = json.Unmarshal(bts, &rets.Json)
 	if err != nil {
-		return nil, err
+		return rets, err
 	}
 	return rets, nil
 }
