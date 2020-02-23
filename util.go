@@ -11,10 +11,9 @@ import (
 )
 
 type ErrHandle func()
-type contJSON map[string]interface{}
 type ContJSON struct {
 	Data []byte
-	Json *contJSON
+	Json map[string]interface{}
 }
 
 func RuisRecovers(name string, handle ErrHandle) {
@@ -85,24 +84,22 @@ func (e *ContJSON) GetString(key string) string {
 	if e.Json == nil {
 		return ""
 	}
-	mp := *e.Json
-	if mp[key] == nil {
+	if e.Json[key] == nil {
 		return ""
 	}
 
-	return fmt.Sprint(mp[key])
+	return fmt.Sprint(e.Json[key])
 }
 
 func (e *ContJSON) GetInt(key string) (int64, error) {
 	if e.Json == nil {
 		return 0, errors.New("not init")
 	}
-	mp := *e.Json
-	if mp[key] == nil {
+	if e.Json[key] == nil {
 		return 0, errors.New("not found")
 	}
 
-	v := mp[key]
+	v := e.Json[key]
 	switch v.(type) {
 	case int:
 		return v.(int64), nil
@@ -121,12 +118,11 @@ func (e *ContJSON) GetFloat(key string) (float64, error) {
 	if e.Json == nil {
 		return 0, errors.New("not init")
 	}
-	mp := *e.Json
-	if mp[key] == nil {
+	if e.Json[key] == nil {
 		return 0, errors.New("not found")
 	}
 
-	v := mp[key]
+	v := e.Json[key]
 	switch v.(type) {
 	case int:
 		return float64(v.(int)), nil
@@ -145,12 +141,11 @@ func (e *ContJSON) GetBool(key string) bool {
 	if e.Json == nil {
 		return false
 	}
-	mp := *e.Json
-	if mp[key] == nil {
+	if e.Json[key] == nil {
 		return false
 	}
 
-	v := mp[key]
+	v := e.Json[key]
 	switch v.(type) {
 	case bool:
 		return v.(bool)
