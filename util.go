@@ -11,7 +11,10 @@ import (
 )
 
 type ErrHandle func()
-type ContJSON map[string]interface{}
+type ContJSON struct {
+	Data []byte
+	Json map[string]interface{}
+}
 
 func RuisRecovers(name string, handle ErrHandle) {
 	if err := recover(); err != nil {
@@ -46,21 +49,21 @@ func getContJson(c *macaron.Context) (cjs ContJSON, rterr error) {
 	defer RuisRecovers("getContJson", func() {
 		rterr = errors.New("logic error")
 	})
-	pars := GetNewMaps()
+	rets := ContJSON{}
 	contp := c.Req.Header.Get("Content-Type")
 	if !strings.HasPrefix(contp, "application/json") {
-		return ContJSON{}, errors.New("content not json")
+		return rets, errors.New("content not json")
 	}
 	bts, err := c.Req.Body().Bytes()
 	if err != nil {
-		return ContJSON{}, err
+		return rets, err
 	}
-	err = json.Unmarshal(bts, &pars)
+	rets.Data = bts
+	err = json.Unmarshal(bts, &rets.Json)
 	if err != nil {
-		return ContJSON{}, err
+		return rets, err
 	}
-	c.Data["bytes"] = bts
-	return pars, nil
+	return rets, nil
 }
 func checkContJson(c *macaron.Context) {
 	cont, _ := getContJson(c)
@@ -77,20 +80,26 @@ func AccessAllowFun(c *macaron.Context) {
 	}
 }
 
-func (e ContJSON) GetString(key string) string {
-	if e[key] == nil {
+func (e *ContJSON) GetString(key string) string {
+	if e.Json == nil {
+		return ""
+	}
+	if e.Json[key] == nil {
 		return ""
 	}
 
-	return fmt.Sprint(e[key])
+	return fmt.Sprint(e.Json[key])
 }
 
-func (e ContJSON) GetInt(key string) (int64, error) {
-	if e[key] == nil {
+func (e *ContJSON) GetInt(key string) (int64, error) {
+	if e.Json == nil {
+		return 0, errors.New("not init")
+	}
+	if e.Json[key] == nil {
 		return 0, errors.New("not found")
 	}
 
-	v := e[key]
+	v := e.Json[key]
 	switch v.(type) {
 	case int:
 		return v.(int64), nil
@@ -105,12 +114,15 @@ func (e ContJSON) GetInt(key string) (int64, error) {
 	}
 	return 0, errors.New("not found")
 }
-func (e ContJSON) GetFloat(key string) (float64, error) {
-	if e[key] == nil {
+func (e *ContJSON) GetFloat(key string) (float64, error) {
+	if e.Json == nil {
+		return 0, errors.New("not init")
+	}
+	if e.Json[key] == nil {
 		return 0, errors.New("not found")
 	}
 
-	v := e[key]
+	v := e.Json[key]
 	switch v.(type) {
 	case int:
 		return float64(v.(int)), nil
@@ -125,12 +137,15 @@ func (e ContJSON) GetFloat(key string) (float64, error) {
 	}
 	return 0, errors.New("not found")
 }
-func (e ContJSON) GetBool(key string) bool {
-	if e[key] == nil {
+func (e *ContJSON) GetBool(key string) bool {
+	if e.Json == nil {
+		return false
+	}
+	if e.Json[key] == nil {
 		return false
 	}
 
-	v := e[key]
+	v := e.Json[key]
 	switch v.(type) {
 	case bool:
 		return v.(bool)
