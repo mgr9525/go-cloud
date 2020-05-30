@@ -22,8 +22,8 @@ func runConsul(host string, port int) {
 
 	//创建一个新服务。
 	registration := new(consulapi.AgentServiceRegistration)
-	registration.ID = CloudConf.Consul.Id
-	registration.Name = CloudConf.Consul.Name
+	registration.ID = fmt.Sprintf("%s-%s", CloudConf.Consul.Group, CloudConf.Server.Name)
+	registration.Name = CloudConf.Consul.Group
 	registration.Address = host
 	registration.Port = port
 	registration.Tags = CloudConf.Consul.Tags

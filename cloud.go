@@ -47,7 +47,7 @@ func RunApp(ymlpath string, consRt func(), consfun func() []template.FuncMap) {
 	if CloudConf.Logger.Enable && CloudConf.Logger.Path != "" {
 		runLogger()
 	}
-	if CloudConf.Consul.Enable && CloudConf.Consul.Id != "" && CloudConf.Consul.Name != "" {
+	if CloudConf.Consul.Enable && CloudConf.Server.Name != "" && CloudConf.Consul.Group != "" {
 		runConsul(host, port)
 	}
 

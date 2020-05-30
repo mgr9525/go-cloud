@@ -27,8 +27,7 @@ type consulConfig struct {
 	Enable  bool
 	Host    string
 	Port    int
-	Id      string
-	Name    string
+	Group   string
 	Reghost string
 	Tags    []string
 }
