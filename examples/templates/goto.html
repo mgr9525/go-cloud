@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        .content{
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 45%;
+            bottom: 0;
+            text-align: center;
+            font-size: 16px;
+            color: #443ad6;
+        }
+    </style>
+</head>
+<body>
+<div class="content">
+    正在跳转...
+</div>
+
+
+<script>
+    var msg={{.msg}};
+    var url={{.url}};
+    var urlrex=/((ht|f)tps?:)\/\/[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]/ig;
+    if (msg!=null&&msg.length>0)
+        document.getElementsByClassName("content")[0].innerHTML=msg;
+    setTimeout(function () {
+        if (url!=null&&url.length>0) {
+            if(urlrex.test(url))
+                window.location = url;
+            else
+                window.location = decodeURIComponent(url);
+        }else
+            window.location='/';
+    },(msg!=null&&msg.length>0)?2000:100);
+</script>
+</body>
+</html>
