@@ -27,6 +27,7 @@ consul:
   #host: localhost
   #port: 8500
   group: go-cloud
+  ## id=${group}-${server.name}
   reghost: localhost
   #tags: [123,345,654]
 datasorce:
