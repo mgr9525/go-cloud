@@ -71,10 +71,13 @@ func (c *CloudExec) execHttpJSON(path string, body interface{}) (int, []byte, er
 	}
 	req.Header.Set("Content-Type", "application/json;charset=utf-8")
 	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return 0, nil, err
+	}
 	defer res.Body.Close()
 	byts, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		return 0, nil, err
+		return res.StatusCode, nil, err
 	}
 	return res.StatusCode, byts, nil
 }
