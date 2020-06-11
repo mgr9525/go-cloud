@@ -5,6 +5,7 @@ import (
 	"github.com/getlantern/errors"
 	"gopkg.in/macaron.v1"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 )
@@ -25,12 +26,16 @@ func getToken(c *macaron.Context) string {
 	return tkc.Value
 }
 func getTokenAuth(c *macaron.Context) string {
-	aths := c.Req.Header.Get("Authorization")
+	ats := c.Req.Header.Get("Authorization")
+	if ats == "" {
+		return ""
+	}
+	aths, err := url.PathUnescape(ats)
+	if err != nil {
+		return ""
+	}
 	if strings.HasPrefix(aths, "TOKEN ") {
 		return strings.Replace(aths, "TOKEN ", "", 1)
-	}
-	if strings.HasPrefix(aths, "TOKEN:") {
-		return strings.Replace(aths, "TOKEN:", "", 1)
 	}
 	return ""
 }
