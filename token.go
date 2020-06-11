@@ -26,8 +26,8 @@ func getToken(c *macaron.Context) string {
 }
 func getTokenAuth(c *macaron.Context) string {
 	aths := c.Req.Header.Get("Authorization")
-	if strings.HasPrefix(aths, "TOKEN ") {
-		return strings.Replace(aths, "TOKEN ", "", 1)
+	if strings.HasPrefix(aths, "TOKEN:") {
+		return strings.Replace(aths, "TOKEN:", "", 1)
 	}
 	return ""
 }
