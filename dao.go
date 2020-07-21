@@ -34,7 +34,14 @@ func XormFindCount(ses *xorm.Session, rowsSlicePtr interface{}) (int64, error) {
 	return 0, errors.New("not found table")
 }
 
-func XormFindPage(ses *xorm.Session, ls interface{}, page int64, size interface{}) (*Page, error) {
+func XormFindPage(ses *xorm.Session, ls interface{}, page int64, size ...int64) (*Page, error) {
+	count, err := XormFindCount(ses, ls)
+	if err != nil {
+		return nil, err
+	}
+	return XormFindPages(ses, ls, count, page, size...)
+}
+func XormFindPages(ses *xorm.Session, ls interface{}, count, page int64, size ...int64) (*Page, error) {
 	var pageno int64 = 1
 	var sizeno int64 = 10
 	var pagesno int64 = 0
@@ -42,22 +49,11 @@ func XormFindPage(ses *xorm.Session, ls interface{}, page int64, size interface{
 	if page > 0 {
 		pageno = page
 	}
-	if size != nil {
-		switch size.(type) {
-		case int:
-			sizeno = int64(size.(int))
-			break
-		case int64:
-			sizeno = size.(int64)
-			break
-		}
+	if len(size) > 0 && size[0] > 0 {
+		sizeno = size[0]
 	}
 	start := (pageno - 1) * sizeno
-	err := ses.Clone().Limit(int(sizeno), int(start)).Find(ls)
-	if err != nil {
-		return nil, err
-	}
-	count, err := XormFindCount(ses, ls)
+	err := ses.Limit(int(sizeno), int(start)).Find(ls)
 	if err != nil {
 		return nil, err
 	}
