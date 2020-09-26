@@ -30,7 +30,7 @@ require (
 	github.com/xormplus/core v0.0.0-20190724072625-00f5a85ad6e0 // indirect
 	github.com/xormplus/xorm v0.0.0-20190815102311-3995c60c8bb6
 	gopkg.in/flosch/pongo2.v3 v3.0.0-20141028000813-5e81b817a0c4 // indirect
-	gopkg.in/macaron.v1 v1.3.4
+	gopkg.in/macaron.v1 v1.3.9
 	gopkg.in/mgo.v2 v2.0.0-20180705113604-9856a29383ce
 	gopkg.in/yaml.v2 v2.2.2
 )
