@@ -21,7 +21,6 @@ require (
 	github.com/go-macaron/pongo2 v0.0.0-20180906102555-6074d2551820
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/go-stack/stack v1.8.0 // indirect
-	github.com/hashicorp/consul/api v1.1.0
 	github.com/klauspost/compress v1.7.5 // indirect
 	github.com/klauspost/cpuid v1.2.1 // indirect
 	github.com/lib/pq v1.2.0

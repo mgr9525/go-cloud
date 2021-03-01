@@ -4,7 +4,6 @@ import (
 	"github.com/go-macaron/cache"
 	"github.com/go-macaron/gzip"
 	"github.com/go-macaron/pongo2"
-	consulapi "github.com/hashicorp/consul/api"
 	"gopkg.in/macaron.v1"
 	"gopkg.in/yaml.v2"
 	"html/template"
@@ -12,8 +11,7 @@ import (
 )
 
 var (
-	Web    *macaron.Macaron
-	Consul *consulapi.Client
+	Web *macaron.Macaron
 )
 
 func RunApp(ymlpath string, consRt func(), consfun func() []template.FuncMap) {
@@ -46,9 +44,6 @@ func RunApp(ymlpath string, consRt func(), consfun func() []template.FuncMap) {
 
 	if CloudConf.Logger.Enable && CloudConf.Logger.Path != "" {
 		runLogger()
-	}
-	if CloudConf.Consul.Enable && CloudConf.Server.Name != "" && CloudConf.Consul.Group != "" {
-		runConsul(host, port)
 	}
 
 	funcMap := []template.FuncMap{map[string]interface{}{

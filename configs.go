@@ -10,7 +10,7 @@ var CloudConf = cloudConfig{}
 
 type cloudConfig struct {
 	Server    serverConfig
-	Consul    consulConfig
+	Servs     map[string]string
 	Web       webConfig
 	Cache     cacheConfig
 	Logger    loggerConfig
@@ -22,14 +22,6 @@ type serverConfig struct {
 	Name string
 	Host string
 	Port int
-}
-type consulConfig struct {
-	Enable  bool
-	Host    string
-	Port    int
-	Group   string
-	Reghost string
-	Tags    []string
 }
 type webConfig struct {
 	Gzip     bool

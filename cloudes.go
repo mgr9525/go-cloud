@@ -18,16 +18,11 @@ type CloudExec struct {
 
 func (c *CloudExec) execHttp(path string, data *url.Values) (int, []byte, error) {
 	host := c.Host
-	if len(host) <= 0 && len(c.Serv) > 0 && Consul != nil {
-		services, err := Consul.Agent().Services()
-		if err != nil {
-			return 0, nil, err
-		}
-		service := services[c.Serv]
-		if service == nil {
-			return 0, nil, errors.New("no service")
-		}
-		host = fmt.Sprintf("http://%s:%d", service.Address, service.Port)
+	if len(host) <= 0 {
+		host = CloudConf.Servs[c.Serv]
+	}
+	if len(host) <= 0 {
+		return 0, nil, errors.New("host is empty")
 	}
 	if data == nil {
 		data = &url.Values{}
@@ -45,16 +40,11 @@ func (c *CloudExec) execHttp(path string, data *url.Values) (int, []byte, error)
 }
 func (c *CloudExec) execHttpJSON(path string, body interface{}) (int, []byte, error) {
 	host := c.Host
-	if len(host) <= 0 && len(c.Serv) > 0 && Consul != nil {
-		services, err := Consul.Agent().Services()
-		if err != nil {
-			return 0, nil, err
-		}
-		service := services[c.Serv]
-		if service == nil {
-			return 0, nil, errors.New("no service")
-		}
-		host = fmt.Sprintf("http://%s:%d", service.Address, service.Port)
+	if len(host) <= 0 {
+		host = CloudConf.Servs[c.Serv]
+	}
+	if len(host) <= 0 {
+		return 0, nil, errors.New("host is empty")
 	}
 	if body == nil {
 		body = map[string]interface{}{}
