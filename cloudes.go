@@ -20,9 +20,10 @@ func (c *CloudExec) execHttp(path string, data *url.Values) (int, []byte, error)
 	host := c.Host
 	if len(host) <= 0 {
 		host = CloudConf.Servs[c.Serv]
-	}
-	if len(host) <= 0 {
-		return 0, nil, errors.New("host is empty")
+		if len(host) <= 0 {
+			return 0, nil, errors.New("host is empty")
+		}
+		host = "http://" + host
 	}
 	if data == nil {
 		data = &url.Values{}
