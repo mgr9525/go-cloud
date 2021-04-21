@@ -17,9 +17,10 @@ type cloudConfig struct {
 	Custom    map[string]interface{}
 }
 type serverConfig struct {
-	Name string
-	Host string
-	Port int
+	Name    string
+	Host    string
+	Port    int
+	SysHost string `yaml:"sysHost"`
 }
 type cacheConfig struct {
 	Enable  bool
@@ -37,7 +38,6 @@ type dbConfig struct {
 	Enable bool
 	Driver string
 	Url    string
-	Tlpath string
 }
 type tokenConfig struct {
 	Enable   bool

@@ -1,6 +1,7 @@
 package gocloud
 
 import (
+	"errors"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -22,6 +23,9 @@ func CreateToken(claims jwt.MapClaims, tmout time.Duration) (string, error) {
 	return tokens, nil
 }
 func SetToken(c *gin.Context, p jwt.MapClaims, rem bool, doman ...string) (string, error) {
+	if !CloudConf.Token.Enable || CloudConf.Token.Name == "" {
+		return "", errors.New("token not enable")
+	}
 	tmout := time.Hour * 5
 	if rem {
 		tmout = time.Hour * 24 * 5
@@ -31,9 +35,15 @@ func SetToken(c *gin.Context, p jwt.MapClaims, rem bool, doman ...string) (strin
 		return "", err
 	}
 	cke := http.Cookie{
-		Name:     "gokinstk",
 		Value:    tokens,
-		HttpOnly: true,
+		Name:     CloudConf.Token.Name,
+		HttpOnly: CloudConf.Token.Httponly,
+	}
+	if CloudConf.Token.Path != "" {
+		cke.Path = CloudConf.Token.Path
+	}
+	if CloudConf.Token.Domain != "" {
+		cke.Domain = CloudConf.Token.Domain
 	}
 	if len(doman) > 0 {
 		cke.Domain = doman[0]
@@ -48,9 +58,18 @@ func SetToken(c *gin.Context, p jwt.MapClaims, rem bool, doman ...string) (strin
 }
 
 func ClearToken(c *gin.Context, doman ...string) error {
+	if !CloudConf.Token.Enable || CloudConf.Token.Name == "" {
+		return errors.New("token not enable")
+	}
 	cke := http.Cookie{
-		Name:     "gokinstk",
-		HttpOnly: true,
+		Name:     CloudConf.Token.Name,
+		HttpOnly: CloudConf.Token.Httponly,
+	}
+	if CloudConf.Token.Path != "" {
+		cke.Path = CloudConf.Token.Path
+	}
+	if CloudConf.Token.Domain != "" {
+		cke.Domain = CloudConf.Token.Domain
 	}
 	if len(doman) > 0 {
 		cke.Domain = doman[0]
