@@ -1,13 +1,9 @@
-package routes
+package route
 
 import (
 	"github.com/gin-gonic/gin"
 	gocloud "github.com/mgr9525/go-cloud"
 )
-
-func IndexHandler(c *gin.Context) {
-	c.HTML(200, "index", nil)
-}
 
 type IndexController struct{}
 

@@ -27,4 +27,4 @@ datasorce:
   mongo:
     enable: true
     driver: mongo
-    url: mongodb://root:123456@localhost/test
+    url: mongodb://root:123456@localhost

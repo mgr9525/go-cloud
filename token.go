@@ -80,7 +80,10 @@ func ClearToken(c *gin.Context, doman ...string) error {
 }
 
 func getToken(c *gin.Context) string {
-	tkc, err := c.Request.Cookie("gokinstk")
+	if !CloudConf.Token.Enable || CloudConf.Token.Name == "" {
+		return ""
+	}
+	tkc, err := c.Request.Cookie(CloudConf.Token.Name)
 	if err != nil {
 		return ""
 	}
