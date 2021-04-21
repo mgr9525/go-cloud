@@ -15,7 +15,7 @@ func main() {
 	//gocloud.Web.Any("/",routes.IndexHandler)
 	gocloud.RegController(&routes.IndexController{})
 
-	if err := gocloud.RunApp(""); err != nil {
+	if err := gocloud.Run(); err != nil {
 		logrus.Errorf("RunApp err:%v", err)
 	}
 }

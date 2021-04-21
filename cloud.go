@@ -18,21 +18,18 @@ func init() {
 	Web = gin.Default()
 }
 
-func RunApp(ymlpath string) error {
+func Init(pths ...string) error {
 	fls := "app.yml"
-	if ymlpath != "" {
-		fls = ymlpath
+	if len(pths) > 0 && pths[0] != "" {
+		fls = pths[0]
 	}
 
+	CloudConf = &cloudConfig{}
 	err := ReadYamlConf(fls, CloudConf)
 	if err != nil {
 		return err
 	}
 
-	host := "0.0.0.0"
-	if CloudConf.Server.Host != "" {
-		host = CloudConf.Server.Host
-	}
 	if CloudConf.Logger.Enable && CloudConf.Logger.Path != "" {
 		runLogger()
 	}
@@ -42,6 +39,18 @@ func RunApp(ymlpath string) error {
 		}
 	}
 
+	return nil
+}
+func Run() error {
+	if CloudConf == nil {
+		if err := Init(); err != nil {
+			return err
+		}
+	}
+	host := "0.0.0.0"
+	if CloudConf.Server.Host != "" {
+		host = CloudConf.Server.Host
+	}
 	var tmplfls []string
 	filepath.Walk("templates", func(path string, info os.FileInfo, err error) error {
 		if strings.HasSuffix(path, ".html") {
@@ -59,6 +68,5 @@ func RunApp(ymlpath string) error {
 		}
 		return nil
 	})
-
 	return Web.Run(fmt.Sprintf("%s:%d", host, CloudConf.Server.Port))
 }

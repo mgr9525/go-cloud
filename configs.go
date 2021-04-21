@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 )
 
-var CloudConf = &cloudConfig{}
+var CloudConf *cloudConfig
 
 type cloudConfig struct {
 	Server    serverConfig

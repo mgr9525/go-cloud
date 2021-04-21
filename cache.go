@@ -25,10 +25,10 @@ func runCache() error {
 
 	return nil
 }
-func CustomCache() error {
+func CustomCache(pths ...string) error {
 	pth := "cache.dat"
-	if CloudConf.Cache.Path != "" {
-		pth = CloudConf.Cache.Path
+	if len(pths) > 0 && pths[0] != "" {
+		pth = pths[0]
 	}
 	db, err := bolt.Open(pth, 0640, nil)
 	if err != nil {
