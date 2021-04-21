@@ -1,22 +1,29 @@
 package routes
 
 import (
-	"github.com/mgr9525/go-cloud"
-	"gopkg.in/macaron.v1"
+	"github.com/gin-gonic/gin"
+	gocloud "github.com/mgr9525/go-cloud"
 )
 
-func IndexHandler(c *macaron.Context, contJSON gocloud.ContJSON) {
-	// Check auto-login.
-	/*uname := c.GetCookie(setting.CookieUserName)
-	if len(uname) != 0 {
-		c.Redirect(setting.AppSubURL + "/user/login")
-		return
-	}*/
+func IndexHandler(c *gin.Context) {
+	c.HTML(200, "index", nil)
+}
 
-	defer gocloud.RuisRecovers("IndexHandler", func() {
-		c.PlainText(500, []byte("server error!"))
-	})
+type IndexController struct{}
 
-	c.Data["PageIsHome"] = true
-	c.HTML(200, "index")
+func (IndexController) GetPath() string {
+	return ""
+}
+func (IndexController) GetMid() gin.HandlerFunc {
+	return nil
+}
+func (c *IndexController) Routes(g gin.IRoutes) {
+	g.Any("/", c.index)
+	g.Any("/test", gocloud.JsonHandle(c.test))
+}
+func (IndexController) index(c *gin.Context) {
+	c.HTML(200, "index.html", map[string]interface{}{"Name": "123"})
+}
+func (IndexController) test(c *gin.Context) {
+
 }

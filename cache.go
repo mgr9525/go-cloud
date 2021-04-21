@@ -1,0 +1,141 @@
+package gocloud
+
+import (
+	"bytes"
+	"encoding/json"
+	"errors"
+	"github.com/boltdb/bolt"
+	"time"
+)
+
+func runCache() error {
+	switch CloudConf.Cache.Adapter {
+	case "file":
+		pth := "cache.dat"
+		if CloudConf.Cache.Path != "" {
+			pth = CloudConf.Cache.Path
+		}
+		db, err := bolt.Open(pth, 0640, nil)
+		if err != nil {
+			return err
+		}
+		Cache = db
+	}
+
+	return nil
+}
+
+// BigEndian
+func BigByteToInt(data []byte) int64 {
+	ln := len(data)
+	rt := int64(0)
+	for i := 0; i < ln; i++ {
+		rt |= int64(data[ln-1-i]) << (i * 8)
+	}
+	return rt
+}
+func BigIntToByte(data int64, ln int) []byte {
+	rt := make([]byte, ln)
+	for i := 0; i < ln; i++ {
+		rt[ln-1-i] = byte(data >> (i * 8))
+	}
+	return rt
+}
+
+var mainCacheBucket = []byte("mainCacheBucket")
+
+func CacheSet(key string, data []byte, outm ...time.Duration) error {
+	if Cache == nil {
+		return errors.New("cache not init")
+	}
+	err := Cache.Update(func(tx *bolt.Tx) error {
+		var err error
+		bk := tx.Bucket(mainCacheBucket)
+		if bk == nil {
+			bk, err = tx.CreateBucket(mainCacheBucket)
+			if err != nil {
+				return err
+			}
+		}
+		if data == nil {
+			return bk.Delete([]byte(key))
+		}
+		buf := &bytes.Buffer{}
+		var outms []byte
+		if len(outm) > 0 {
+			outms = []byte(time.Now().Add(outm[0]).Format(time.RFC3339Nano))
+		} else {
+			outms = []byte(time.Now().Add(time.Hour).Format(time.RFC3339Nano))
+		}
+		buf.Write(BigIntToByte(int64(len(outms)), 4))
+		buf.Write(outms)
+		buf.Write(data)
+		return bk.Put([]byte(key), buf.Bytes())
+	})
+	return err
+}
+func CacheSets(key string, data interface{}, outm ...time.Duration) error {
+	if Cache == nil {
+		return errors.New("cache not init")
+	}
+	if data == nil {
+		return CacheSet(key, nil)
+	}
+	bts, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+	return CacheSet(key, bts, outm...)
+}
+func CacheGet(key string) ([]byte, error) {
+	if Cache == nil {
+		return nil, errors.New("cache not init")
+	}
+	var rt []byte
+	err := Cache.View(func(tx *bolt.Tx) error {
+		bk := tx.Bucket(mainCacheBucket)
+		if bk == nil {
+			return nil
+		}
+		bts := bk.Get([]byte(key))
+		if bts == nil {
+			return nil
+		}
+		ln := int(BigByteToInt(bts[:4]))
+		tms := string(bts[4 : ln+4])
+		outm, err := time.Parse(time.RFC3339Nano, tms)
+		if err != nil {
+			return nil
+		}
+		if time.Since(outm).Milliseconds() < 0 {
+			rt = bts[4+ln:]
+		} else {
+			bk.Delete([]byte(key))
+		}
+		return nil
+	})
+	return rt, err
+}
+func CacheGets(key string, data interface{}) error {
+	if Cache == nil {
+		return errors.New("cache not init")
+	}
+	if data == nil {
+		return errors.New("data not be nil")
+	}
+	bts, err := CacheGet(key)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(bts, data)
+}
+
+func CacheClear() error {
+	if Cache == nil {
+		return errors.New("cache not init")
+	}
+	err := Cache.Update(func(tx *bolt.Tx) error {
+		return tx.DeleteBucket(mainCacheBucket)
+	})
+	return err
+}

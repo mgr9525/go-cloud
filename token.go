@@ -2,73 +2,14 @@ package gocloud
 
 import (
 	"github.com/dgrijalva/jwt-go"
-	"github.com/getlantern/errors"
-	"gopkg.in/macaron.v1"
+	"github.com/gin-gonic/gin"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
 )
 
-/*type SSOToken struct {
-	Id	string
-	Data	string
-}*/
-
-func getToken(c *macaron.Context) string {
-	if !CloudConf.Token.Enable || CloudConf.Token.Name == "" {
-		return ""
-	}
-	tkc, err := c.Req.Cookie(CloudConf.Token.Name)
-	if err != nil {
-		return ""
-	}
-	return tkc.Value
-}
-func getTokenAuth(c *macaron.Context) string {
-	ats := c.Req.Header.Get("Authorization")
-	if ats == "" {
-		return ""
-	}
-	aths, err := url.PathUnescape(ats)
-	if err != nil {
-		return ""
-	}
-	if strings.HasPrefix(aths, "TOKEN ") {
-		return strings.Replace(aths, "TOKEN ", "", 1)
-	}
-	return ""
-}
-
-var secret = func(token *jwt.Token) (interface{}, error) {
-	return []byte(CloudConf.Token.Key), nil
-}
-
-func GetTokens(s string) *jwt.MapClaims {
-	if s == "" {
-		return nil
-	}
-	token, err := jwt.Parse(s, secret)
-	if err == nil {
-		claim, ok := token.Claims.(jwt.MapClaims)
-		if ok {
-			return &claim
-		}
-	}
-	return nil
-}
-func GetToken(c *macaron.Context) *jwt.MapClaims {
-	tk := getTokenAuth(c)
-	if tk == "" {
-		tk = getToken(c)
-	}
-	return GetTokens(tk)
-}
-func CreateToken(p *jwt.MapClaims, tmout time.Duration) (string, error) {
-	if !CloudConf.Token.Enable || CloudConf.Token.Name == "" {
-		return "", errors.New("token not enable")
-	}
-	claims := *p
+func CreateToken(claims jwt.MapClaims, tmout time.Duration) (string, error) {
 	claims["times"] = time.Now()
 	if tmout > 0 {
 		claims["timeout"] = time.Now().Add(tmout)
@@ -80,7 +21,7 @@ func CreateToken(p *jwt.MapClaims, tmout time.Duration) (string, error) {
 	}
 	return tokens, nil
 }
-func SetToken(c *macaron.Context, p *jwt.MapClaims, rem bool, doman ...string) (string, error) {
+func SetToken(c *gin.Context, p jwt.MapClaims, rem bool, doman ...string) (string, error) {
 	tmout := time.Hour * 5
 	if rem {
 		tmout = time.Hour * 24 * 5
@@ -89,12 +30,10 @@ func SetToken(c *macaron.Context, p *jwt.MapClaims, rem bool, doman ...string) (
 	if err != nil {
 		return "", err
 	}
-	cke := http.Cookie{Name: CloudConf.Token.Name, Value: tokens, HttpOnly: CloudConf.Token.Httponly}
-	if CloudConf.Token.Path != "" {
-		cke.Path = CloudConf.Token.Path
-	}
-	if CloudConf.Token.Domain != "" {
-		cke.Domain = CloudConf.Token.Domain
+	cke := http.Cookie{
+		Name:     "gokinstk",
+		Value:    tokens,
+		HttpOnly: true,
 	}
 	if len(doman) > 0 {
 		cke.Domain = doman[0]
@@ -104,26 +43,61 @@ func SetToken(c *macaron.Context, p *jwt.MapClaims, rem bool, doman ...string) (
 	if rem {
 		cke.MaxAge = 60 * 60 * 24 * 5
 	}
-	c.Resp.Header().Add("Set-Cookie", cke.String())
+	c.Writer.Header().Add("Set-Cookie", cke.String())
 	return tokens, nil
 }
 
-func ClearToken(c *macaron.Context, doman ...string) error {
-	if !CloudConf.Token.Enable || CloudConf.Token.Name == "" {
-		return errors.New("token not enable")
-	}
-
-	cke := http.Cookie{Name: CloudConf.Token.Name, Value: "", HttpOnly: CloudConf.Token.Httponly}
-	if CloudConf.Token.Path != "" {
-		cke.Path = CloudConf.Token.Path
-	}
-	if CloudConf.Token.Domain != "" {
-		cke.Domain = CloudConf.Token.Domain
+func ClearToken(c *gin.Context, doman ...string) error {
+	cke := http.Cookie{
+		Name:     "gokinstk",
+		HttpOnly: true,
 	}
 	if len(doman) > 0 {
 		cke.Domain = doman[0]
 	}
 	cke.MaxAge = -1
-	c.Resp.Header().Set("Set-Cookie", cke.String())
+	c.Writer.Header().Set("Set-Cookie", cke.String())
 	return nil
+}
+
+func getToken(c *gin.Context) string {
+	tkc, err := c.Request.Cookie("gokinstk")
+	if err != nil {
+		return ""
+	}
+	return tkc.Value
+}
+func getTokenAuth(c *gin.Context) string {
+	ats := c.GetHeader("Authorization")
+	if ats == "" {
+		return ""
+	}
+	aths, err := url.PathUnescape(ats)
+	if err != nil {
+		return ""
+	}
+	strings.Replace(aths, "TOKEN ", "", 1)
+	return aths
+}
+func GetTokens(s string) jwt.MapClaims {
+	if s == "" {
+		return nil
+	}
+	token, err := jwt.Parse(s, func(token *jwt.Token) (interface{}, error) {
+		return []byte(CloudConf.Token.Key), nil
+	})
+	if err == nil {
+		claim, ok := token.Claims.(jwt.MapClaims)
+		if ok {
+			return claim
+		}
+	}
+	return nil
+}
+func GetToken(c *gin.Context) jwt.MapClaims {
+	tk := getTokenAuth(c)
+	if tk == "" {
+		tk = getToken(c)
+	}
+	return GetTokens(tk)
 }

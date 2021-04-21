@@ -2,19 +2,16 @@ server:
   name: main
   #host: localhost
   port: 8081
-web:
-  gzip: true
-  template: renderer #pongo2,renderer
 cache:
   enable: false
   interval: 3600
   adapter: file #memory,redis,memcache
-  configs: data/caches #addr=127.0.0.1:6379,password=macaron
+  #path: data/caches #addr=127.0.0.1:6379,password=macaron
 logger:
   enable: true
-  path: run.log
-  filesize: 5
-  filenum: 5
+  #isJson: true
+  #fileSize: 5
+  #fileCount: 5
 token:
   enable: true
   httponly: false

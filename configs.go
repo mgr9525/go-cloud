@@ -1,17 +1,15 @@
 package gocloud
 
 import (
+	"errors"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	"log"
 )
 
-var CloudConf = cloudConfig{}
+var CloudConf = &cloudConfig{}
 
 type cloudConfig struct {
 	Server    serverConfig
-	Servs     map[string]string
-	Web       webConfig
 	Cache     cacheConfig
 	Logger    loggerConfig
 	Token     tokenConfig
@@ -23,21 +21,17 @@ type serverConfig struct {
 	Host string
 	Port int
 }
-type webConfig struct {
-	Gzip     bool
-	Template string
-}
 type cacheConfig struct {
-	Enable   bool
-	Interval int
-	Adapter  string
-	Configs  string
+	Enable  bool
+	Adapter string
+	Path    string
 }
 type loggerConfig struct {
-	Enable   bool
-	Path     string
-	Filesize int
-	Filenum  int
+	Enable    bool
+	Path      string
+	IsJson    bool  `yaml:"isJson"`
+	FileSize  int64 `yaml:"fileSize"`
+	FileCount int64 `yaml:"fileCount"`
 }
 type dbConfig struct {
 	Enable bool
@@ -54,20 +48,18 @@ type tokenConfig struct {
 	Domain   string
 }
 
-func GetCustomConf(fls string, conf interface{}) {
-	cfgs := "custom.yml"
-	if len(fls) > 0 {
-		cfgs = fls
+func ReadYamlConf(fls string, conf interface{}) error {
+	if fls == "" {
+		return errors.New("param err")
 	}
-	data, err := ioutil.ReadFile(cfgs)
+	data, err := ioutil.ReadFile(fls)
 	if err != nil {
-		log.Fatal("config file errs : ", err)
-		return
+		return err
 	}
 
 	err = yaml.Unmarshal(data, conf)
 	if err != nil {
-		log.Fatal("config file yaml errs : ", err)
-		return
+		return err
 	}
+	return nil
 }

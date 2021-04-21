@@ -1,107 +1,65 @@
 package gocloud
 
 import (
-	"github.com/go-macaron/cache"
-	"github.com/go-macaron/gzip"
-	"github.com/go-macaron/pongo2"
-	"gopkg.in/macaron.v1"
-	"gopkg.in/yaml.v2"
-	"html/template"
-	"io/ioutil"
+	"fmt"
+	"github.com/boltdb/bolt"
+	"github.com/gin-gonic/gin"
+	"os"
+	"path/filepath"
+	"strings"
 )
 
 var (
-	Web *macaron.Macaron
+	Web   *gin.Engine
+	Cache *bolt.DB
 )
 
-func RunApp(ymlpath string, consRt func(), consfun func() []template.FuncMap) {
-	cfgs := "app.yml"
-	if len(ymlpath) > 0 {
-		cfgs = ymlpath
-	}
-	data, err := ioutil.ReadFile(cfgs)
-	if err != nil {
-		println("config file errs:" + err.Error())
-		return
+func init() {
+	Web = gin.Default()
+}
+
+func RunApp(ymlpath string) error {
+	fls := "app.yml"
+	if ymlpath != "" {
+		fls = ymlpath
 	}
 
-	err = yaml.Unmarshal(data, &CloudConf)
+	err := ReadYamlConf(fls, CloudConf)
 	if err != nil {
-		println("config file yaml.Unmarshal errs:" + err.Error())
-		return
+		return err
 	}
-
-	Web = macaron.Classic()
 
 	host := "0.0.0.0"
-	port := 4000
 	if CloudConf.Server.Host != "" {
 		host = CloudConf.Server.Host
 	}
-	if CloudConf.Server.Port > 0 {
-		port = CloudConf.Server.Port
-	}
-
 	if CloudConf.Logger.Enable && CloudConf.Logger.Path != "" {
 		runLogger()
 	}
-
-	funcMap := []template.FuncMap{map[string]interface{}{
-		"AppName": func() string {
-			return "GoCloud"
-		},
-		"AppVer": func() string {
-			return "1.0.0"
-		},
-	}}
-
-	if consfun != nil {
-		fmp := consfun()
-		if fmp != nil {
-			funcMap = fmp
-		}
-	}
-	runMids(funcMap)
-	if consRt != nil {
-		consRt()
-	}
-	runController()
-	Web.Run(host, port)
-}
-
-func runMids(funcMap []template.FuncMap) {
-	Web.Use(checkContJson) //contJSON 解析
-	Web.Use(macaron.Logger())
-	Web.Use(macaron.Static("static"))
-	if CloudConf.Web.Gzip {
-		Web.Use(gzip.Gziper())
-	}
-	if CloudConf.Web.Template == "pongo2" {
-		Web.Use(pongo2.Pongoer(pongo2.Options{
-			Directory: "templates",
-			//AppendDirectories:
-			Extensions: []string{".tmpl", ".html"},
-			//Funcs:             funcMap,
-			//IndentJSON:        macaron.Env != macaron.PROD,
-		}))
-	} else {
-		Web.Use(macaron.Renderer(macaron.RenderOptions{
-			Directory: "templates",
-			//AppendDirectories:
-			Extensions: []string{".tmpl", ".html"},
-			Funcs:      funcMap,
-			IndentJSON: macaron.Env != macaron.PROD,
-		}))
-	}
 	if CloudConf.Cache.Enable && CloudConf.Cache.Adapter != "" {
-		opt := cache.Options{
-			Adapter:       CloudConf.Cache.Adapter,
-			AdapterConfig: CloudConf.Cache.Configs,
-			Interval:      CloudConf.Cache.Interval,
+		if err = runCache(); err != nil {
+			return err
 		}
-		if CloudConf.Cache.Adapter == "redis" {
-			opt.OccupyMode = false
-		}
-		Web.Use(cache.Cacher(opt))
 	}
+
+	var tmplfls []string
+	filepath.Walk("templates", func(path string, info os.FileInfo, err error) error {
+		if strings.HasSuffix(path, ".html") {
+			tmplfls = append(tmplfls, path)
+		}
+		return nil
+	})
+	Web.LoadHTMLFiles(tmplfls...)
+	var staticfls []string
+	filepath.Walk("static", func(path string, info os.FileInfo, err error) error {
+		staticfls = append(staticfls, path)
+		pth := "?" + strings.ReplaceAll(path, "\\", "/")
+		if strings.HasPrefix(pth, "?static/") {
+			println("static:" + pth)
+			Web.StaticFile(strings.ReplaceAll(pth, "?static", ""), path)
+		}
+		return nil
+	})
+
+	return Web.Run(fmt.Sprintf("%s:%d", host, CloudConf.Server.Port))
 }

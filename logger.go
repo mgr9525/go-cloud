@@ -1,22 +1,25 @@
 package gocloud
 
 import (
-	"github.com/donnie4w/go-logger/logger"
+	loglfshook "github.com/mgr9525/logrus-file-hook"
+	"github.com/sirupsen/logrus"
 	"path/filepath"
 )
 
 func runLogger() {
-	dir := filepath.Dir(CloudConf.Logger.Path)
-	name := filepath.Base(CloudConf.Logger.Path)
-	sz := 1
-	num := 10
-	if CloudConf.Logger.Filesize > 0 {
-		sz = CloudConf.Logger.Filesize
+	dir := "logs"
+	if CloudConf.Logger.Path != "" {
+		dir = filepath.Join(CloudConf.Logger.Path, "logs")
 	}
-	if CloudConf.Logger.Filenum > 0 {
-		num = CloudConf.Logger.Filenum
+	pmp := loglfshook.PathMap{
+		logrus.InfoLevel:  filepath.Join(dir, "info.log"),
+		logrus.ErrorLevel: filepath.Join(dir, "error.log"),
+		logrus.DebugLevel: filepath.Join(dir, "debug.log"),
 	}
-	logger.SetRollingFile(dir, name, int32(num), int64(sz), logger.MB)
-	//logger.SetLevel(logger.INFO)
-	//logger.Debug("logger start:",time.Now())
+	logrus.SetLevel(logrus.DebugLevel)
+	var formatter logrus.Formatter = &logrus.TextFormatter{}
+	if CloudConf.Logger.IsJson {
+		formatter = &logrus.JSONFormatter{}
+	}
+	logrus.AddHook(loglfshook.NewLfsHook(pmp, formatter, CloudConf.Logger.FileSize, CloudConf.Logger.FileCount))
 }

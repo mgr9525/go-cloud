@@ -2,9 +2,8 @@ package main
 
 import (
 	"github.com/mgr9525/go-cloud"
-	"github.com/mgr9525/go-cloud/examples/controller"
 	"github.com/mgr9525/go-cloud/examples/routes"
-	"html/template"
+	"github.com/sirupsen/logrus"
 )
 
 func main() {
@@ -13,21 +12,10 @@ func main() {
 		ymlpath=os.Args[1]
 	}*/
 
-	gocloud.RunApp("", constomRoute, customFun)
-}
+	//gocloud.Web.Any("/",routes.IndexHandler)
+	gocloud.RegController(&routes.IndexController{})
 
-func customFun() []template.FuncMap {
-	println("constomFun")
-	return []template.FuncMap{map[string]interface{}{
-		"AppName": func() string {
-			return "GoCloud"
-		},
-		"AppVer": func() string {
-			return "1.0.0"
-		},
-	}}
-}
-func constomRoute() {
-	gocloud.RegController(new(controller.UserController))
-	gocloud.Web.Any("/", routes.IndexHandler)
+	if err := gocloud.RunApp(""); err != nil {
+		logrus.Errorf("RunApp err:%v", err)
+	}
 }
