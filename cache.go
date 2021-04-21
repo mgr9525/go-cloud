@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/boltdb/bolt"
+	"github.com/sirupsen/logrus"
 	"time"
 )
 
@@ -91,6 +92,7 @@ func CacheGet(key string) ([]byte, error) {
 	if Cache == nil {
 		return nil, errors.New("cache not init")
 	}
+	go mainCacheClear()
 	var rt []byte
 	err := Cache.View(func(tx *bolt.Tx) error {
 		bk := tx.Bucket(mainCacheBucket)
@@ -138,4 +140,25 @@ func CacheClear() error {
 		return tx.DeleteBucket(mainCacheBucket)
 	})
 	return err
+}
+
+var mainCacheClearTime time.Time
+
+func mainCacheClear() {
+	defer func() {
+		if err := recover(); err != nil {
+			logrus.Errorf("mainCacheClear recover err:%v", err)
+		}
+	}()
+
+	if Cache == nil {
+		return
+	}
+	if /*time.Now().Hour()!=3||*/ time.Since(mainCacheClearTime).Hours() < 30 {
+		return
+	}
+	mainCacheClearTime = time.Now()
+	if err := CacheClear(); err != nil {
+		logrus.Errorf("mainCacheClear err:%v", err)
+	}
 }
