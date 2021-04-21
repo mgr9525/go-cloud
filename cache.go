@@ -25,6 +25,18 @@ func runCache() error {
 
 	return nil
 }
+func CustomCache() error {
+	pth := "cache.dat"
+	if CloudConf.Cache.Path != "" {
+		pth = CloudConf.Cache.Path
+	}
+	db, err := bolt.Open(pth, 0640, nil)
+	if err != nil {
+		return err
+	}
+	Cache = db
+	return nil
+}
 
 // BigEndian
 func BigByteToInt(data []byte) int64 {

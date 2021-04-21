@@ -55,7 +55,6 @@ func RunApp(ymlpath string) error {
 		staticfls = append(staticfls, path)
 		pth := "?" + strings.ReplaceAll(path, "\\", "/")
 		if strings.HasPrefix(pth, "?static/") {
-			println("static:" + pth)
 			Web.StaticFile(strings.ReplaceAll(pth, "?static", ""), path)
 		}
 		return nil
