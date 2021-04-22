@@ -41,7 +41,7 @@ func RegController(gc GinController) {
 	}
 	gc.Routes(gp)
 }
-func HandleBind(fn interface{}) gin.HandlerFunc {
+func HandleBind(fn interface{}, igrBindErr ...bool) gin.HandlerFunc {
 	fnv := reflect.ValueOf(fn)
 	if fnv.Kind() != reflect.Func {
 		return nil
@@ -59,9 +59,12 @@ func HandleBind(fn interface{}) gin.HandlerFunc {
 			}
 			if argtr.Kind() == reflect.Struct || argtr.Kind() == reflect.Map {
 				argv := reflect.New(argtr)
-				if err := c.Bind(argv.Interface()); err != nil {
-					c.String(500, fmt.Sprintf("params err[%d]:%+v", i, err))
-					return
+				err := c.Bind(argv.Interface())
+				if err != nil {
+					if len(igrBindErr) <= 0 || !igrBindErr[0] {
+						c.String(500, fmt.Sprintf("params err[%d]:%+v", i, err))
+						return
+					}
 				}
 				if argt.Kind() == reflect.Ptr {
 					inls[i] = argv
