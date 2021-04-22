@@ -115,6 +115,9 @@ func parseCacheData(bts []byte) []byte {
 	}
 	return nil
 }
+
+var KeyOutTimeErr = errors.New("key is timeout")
+
 func CacheGet(key string) ([]byte, error) {
 	if Cache == nil {
 		return nil, errors.New("cache not init")
@@ -133,6 +136,7 @@ func CacheGet(key string) ([]byte, error) {
 		rt = parseCacheData(bts)
 		if rt == nil {
 			bk.Delete([]byte(key))
+			return KeyOutTimeErr
 		}
 		return nil
 	})
