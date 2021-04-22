@@ -74,7 +74,7 @@ func Init(pths ...string) error {
 		return err
 	}
 
-	if CloudConf.Logger.Enable && CloudConf.Logger.Path != "" {
+	if CloudConf.Logger.Enable {
 		runLogger()
 	}
 	if CloudConf.Cache.Enable && CloudConf.Cache.Adapter != "" {
