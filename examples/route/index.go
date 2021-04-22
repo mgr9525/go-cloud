@@ -18,7 +18,7 @@ func (c *IndexController) Routes(g gin.IRoutes) {
 	g.Any("/test", gocloud.JsonHandle(c.test))
 }
 func (IndexController) index(c *gin.Context) {
-	c.HTML(200, "index.html", map[string]interface{}{"Name": "123"})
+	c.HTML(200, "index.html", map[string]interface{}{"title": "123", "Name": "123"})
 }
 func (IndexController) test(c *gin.Context) {
 

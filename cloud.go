@@ -4,18 +4,52 @@ import (
 	"fmt"
 	"github.com/boltdb/bolt"
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"html/template"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 var (
 	Web   *gin.Engine
 	Cache *bolt.DB
+
+	WebName string
 )
 
 func init() {
+	WebName = "gocloud"
 	Web = gin.Default()
+	Web.FuncMap["GocloudTitle"] = func(tit interface{}) string {
+		tits := ""
+		if tit != nil {
+			tits = fmt.Sprintf("%v", tit)
+		}
+		if tits == "" {
+			return WebName
+		} else {
+			return fmt.Sprintf("%s-%s", tits, WebName)
+		}
+	}
+	Web.FuncMap["MgoIdHex"] = func(id primitive.ObjectID) string {
+		return id.Hex()
+	}
+	Web.FuncMap["Str2Html"] = func(s string) template.HTML {
+		return template.HTML(s)
+	}
+	Web.FuncMap["ClearHtml"] = func(s string) string {
+		return ClearHTML(s)
+	}
+
+	Web.FuncMap["FmtDate"] = func(t time.Time) string {
+		return t.Format("2006-01-02")
+	}
+	Web.FuncMap["FmtDateTime"] = func(t time.Time) string {
+		return t.Format("2006-01-02 15:04:05")
+	}
 }
 
 func Init(pths ...string) error {
@@ -51,22 +85,36 @@ func Run() error {
 	if CloudConf.Server.Host != "" {
 		host = CloudConf.Server.Host
 	}
-	var tmplfls []string
-	filepath.Walk("templates", func(path string, info os.FileInfo, err error) error {
-		if strings.HasSuffix(path, ".html") {
-			tmplfls = append(tmplfls, path)
-		}
-		return nil
-	})
-	Web.LoadHTMLFiles(tmplfls...)
-	var staticfls []string
-	filepath.Walk("static", func(path string, info os.FileInfo, err error) error {
-		staticfls = append(staticfls, path)
-		pth := "?" + strings.ReplaceAll(path, "\\", "/")
-		if strings.HasPrefix(pth, "?static/") {
-			Web.StaticFile(strings.ReplaceAll(pth, "?static", ""), path)
-		}
-		return nil
-	})
+	initFiles()
 	return Web.Run(fmt.Sprintf("%s:%d", host, CloudConf.Server.Port))
+}
+func initFiles() {
+	if _, err := os.Stat("templates"); os.IsNotExist(err) {
+		Web.FuncMap = nil
+	} else {
+		tmpl := template.New("").Delims("{{", "}}").Funcs(Web.FuncMap)
+		filepath.Walk("templates", func(path string, info os.FileInfo, err error) error {
+			pth := "?" + strings.ReplaceAll(path, "\\", "/")
+			if strings.HasPrefix(pth, "?templates/") && strings.HasSuffix(path, ".html") {
+				//tmplfls = append(tmplfls, path)
+				bts, err := ioutil.ReadFile(path)
+				if err != nil {
+					return err
+				}
+				t := tmpl.New(strings.ReplaceAll(pth, "?templates/", ""))
+				t.Parse(string(bts))
+			}
+			return nil
+		})
+		Web.SetHTMLTemplate(tmpl)
+	}
+	if _, err := os.Stat("static"); !os.IsNotExist(err) {
+		filepath.Walk("static", func(path string, info os.FileInfo, err error) error {
+			pth := "?" + strings.ReplaceAll(path, "\\", "/")
+			if strings.HasPrefix(pth, "?static/") {
+				Web.StaticFile(strings.ReplaceAll(pth, "?static", ""), path)
+			}
+			return nil
+		})
+	}
 }
