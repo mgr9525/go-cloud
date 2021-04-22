@@ -2,64 +2,65 @@ package gocloud
 
 import (
 	"errors"
-	"gopkg.in/yaml.v2"
-	"io/ioutil"
+	"fmt"
+	"strconv"
 )
 
-var CloudConf *cloudConfig
+type Mp map[string]interface{}
 
-type cloudConfig struct {
-	Server    serverConfig
-	Cache     cacheConfig
-	Logger    loggerConfig
-	Token     tokenConfig
-	Datasorce map[string]dbConfig
-	Custom    map[string]interface{}
-}
-type serverConfig struct {
-	Name    string
-	Host    string
-	Port    int
-	SysHost string `yaml:"sysHost"`
-}
-type cacheConfig struct {
-	Enable  bool
-	Adapter string
-	Path    string
-}
-type loggerConfig struct {
-	Enable    bool
-	Path      string
-	IsJson    bool  `yaml:"isJson"`
-	FileSize  int64 `yaml:"fileSize"`
-	FileCount int64 `yaml:"fileCount"`
-}
-type dbConfig struct {
-	Enable bool
-	Driver string
-	Url    string
-}
-type tokenConfig struct {
-	Enable   bool
-	Httponly bool
-	Name     string
-	Key      string
-	Path     string
-	Domain   string
-}
-
-func ReadYamlConf(fls string, conf interface{}) error {
-	if fls == "" {
-		return errors.New("param err")
+func (c Mp) GetString(key string) string {
+	v, ok := c[key]
+	if !ok {
+		return ""
 	}
-	data, err := ioutil.ReadFile(fls)
-	if err != nil {
-		return err
+	return fmt.Sprint(v)
+}
+func (c Mp) GetInt(key string) (int64, error) {
+	v, ok := c[key]
+	if !ok {
+		return 0, errors.New("not found")
 	}
-
-	err = yaml.Unmarshal(data, conf)
-	if err != nil {
-		return err
+	switch v.(type) {
+	case int:
+		return v.(int64), nil
+	case string:
+		return strconv.ParseInt(v.(string), 10, 64)
+	case int64:
+		return v.(int64), nil
+	case float32:
+		return int64(v.(float32)), nil
+	case float64:
+		return int64(v.(float64)), nil
 	}
-	return nil
+	return 0, errors.New("not found")
+}
+func (c Mp) GetFloat(key string) (float64, error) {
+	v, ok := c[key]
+	if !ok {
+		return 0, errors.New("not found")
+	}
+	switch v.(type) {
+	case int:
+		return float64(v.(int)), nil
+	case string:
+		return strconv.ParseFloat(v.(string), 64)
+	case int64:
+		return float64(v.(int64)), nil
+	case float32:
+		return float64(v.(float32)), nil
+	case float64:
+		return v.(float64), nil
+	}
+	return 0, errors.New("not found")
+}
+func (c Mp) GetBool(key string) bool {
+	v, ok := c[key]
+	if !ok {
+		return false
+	}
+	switch v.(type) {
+	case bool:
+		return v.(bool)
+	}
+	return false
 }
