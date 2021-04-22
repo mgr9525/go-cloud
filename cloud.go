@@ -57,6 +57,9 @@ func init() {
 	Web.FuncMap["FmtDateTime"] = func(t time.Time) string {
 		return t.Format("2006-01-02 15:04:05")
 	}
+	Web.FuncMap["MgoIds"] = func(id primitive.ObjectID) string {
+		return id.Hex()
+	}
 }
 
 func Init(pths ...string) error {
