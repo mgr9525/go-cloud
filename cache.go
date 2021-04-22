@@ -100,6 +100,21 @@ func CacheSets(key string, data interface{}, outm ...time.Duration) error {
 	}
 	return CacheSet(key, bts, outm...)
 }
+func parseCacheData(bts []byte) []byte {
+	if bts == nil {
+		return nil
+	}
+	ln := int(BigByteToInt(bts[:4]))
+	tms := string(bts[4 : ln+4])
+	outm, err := time.Parse(time.RFC3339Nano, tms)
+	if err != nil {
+		return nil
+	}
+	if time.Since(outm).Milliseconds() < 0 {
+		return bts[4+ln:]
+	}
+	return nil
+}
 func CacheGet(key string) ([]byte, error) {
 	if Cache == nil {
 		return nil, errors.New("cache not init")
@@ -115,15 +130,8 @@ func CacheGet(key string) ([]byte, error) {
 		if bts == nil {
 			return nil
 		}
-		ln := int(BigByteToInt(bts[:4]))
-		tms := string(bts[4 : ln+4])
-		outm, err := time.Parse(time.RFC3339Nano, tms)
-		if err != nil {
-			return nil
-		}
-		if time.Since(outm).Milliseconds() < 0 {
-			rt = bts[4+ln:]
-		} else {
+		rt = parseCacheData(bts)
+		if rt == nil {
 			bk.Delete([]byte(key))
 		}
 		return nil
@@ -144,7 +152,7 @@ func CacheGets(key string, data interface{}) error {
 	return json.Unmarshal(bts, data)
 }
 
-func CacheClear() error {
+func CacheFlush() error {
 	if Cache == nil {
 		return errors.New("cache not init")
 	}
@@ -170,7 +178,24 @@ func mainCacheClear() {
 		return
 	}
 	mainCacheClearTime = time.Now()
-	if err := CacheClear(); err != nil {
+	/*if err := CacheFlush(); err != nil {
+		logrus.Errorf("mainCacheClear err:%v", err)
+	}*/
+	err := Cache.Update(func(tx *bolt.Tx) error {
+		bk := tx.Bucket(mainCacheBucket)
+		if bk == nil {
+			return nil
+		}
+		bk.ForEach(func(k, v []byte) error {
+			data := parseCacheData(v)
+			if data == nil {
+				return bk.Delete(k)
+			}
+			return nil
+		})
+		return nil
+	})
+	if err != nil {
 		logrus.Errorf("mainCacheClear err:%v", err)
 	}
 }
