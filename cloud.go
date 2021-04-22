@@ -17,22 +17,29 @@ var (
 	Web   *gin.Engine
 	Cache *bolt.DB
 
-	WebName string
+	AppName string
 )
 
 func init() {
-	WebName = "gocloud"
+	AppName = "gocloud"
 	Web = gin.Default()
-	Web.FuncMap["GocloudTitle"] = func(tit interface{}) string {
-		tits := ""
+	Web.FuncMap["AppName"] = func() string {
+		return AppName
+	}
+	Web.FuncMap["GocloudTitle"] = func(tit, tits interface{}) string {
+		if tits != nil {
+			tms := fmt.Sprintf("%v", tits)
+			if tms != "" {
+				return tms
+			}
+		}
 		if tit != nil {
-			tits = fmt.Sprintf("%v", tit)
+			tms := fmt.Sprintf("%v", tit)
+			if tms != "" {
+				return fmt.Sprintf("%s-%s", tms, AppName)
+			}
 		}
-		if tits == "" {
-			return WebName
-		} else {
-			return fmt.Sprintf("%s-%s", tits, WebName)
-		}
+		return AppName
 	}
 	Web.FuncMap["MgoIdHex"] = func(id primitive.ObjectID) string {
 		return id.Hex()
