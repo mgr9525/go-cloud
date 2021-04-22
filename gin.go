@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"reflect"
-	"strings"
 )
 
 type ErrorRes struct {
@@ -42,7 +41,7 @@ func RegController(gc GinController) {
 	}
 	gc.Routes(gp)
 }
-func JsonHandle(fn interface{}) gin.HandlerFunc {
+func HandleBind(fn interface{}) gin.HandlerFunc {
 	fnv := reflect.ValueOf(fn)
 	if fnv.Kind() != reflect.Func {
 		return nil
@@ -60,11 +59,9 @@ func JsonHandle(fn interface{}) gin.HandlerFunc {
 			}
 			if argtr.Kind() == reflect.Struct || argtr.Kind() == reflect.Map {
 				argv := reflect.New(argtr)
-				if strings.Contains(c.ContentType(), "application/json") {
-					if err := c.BindJSON(argv.Interface()); err != nil {
-						c.String(500, fmt.Sprintf("params err[%d]:%+v", i, err))
-						return
-					}
+				if err := c.Bind(argv.Interface()); err != nil {
+					c.String(500, fmt.Sprintf("params err[%d]:%+v", i, err))
+					return
 				}
 				if argt.Kind() == reflect.Ptr {
 					inls[i] = argv
