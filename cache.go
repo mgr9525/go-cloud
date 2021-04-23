@@ -123,7 +123,6 @@ func CacheGet(key string) ([]byte, error) {
 	if Cache == nil {
 		return nil, errors.New("cache not init")
 	}
-	go mainCacheClear()
 	var rt []byte
 	err := Cache.View(func(tx *bolt.Tx) error {
 		bk := tx.Bucket(mainCacheBucket)
@@ -141,6 +140,9 @@ func CacheGet(key string) ([]byte, error) {
 		}
 		return nil
 	})
+	if time.Since(mainCacheClearTime).Hours() > 30 {
+		go mainCacheClear()
+	}
 	return rt, err
 }
 func CacheGets(key string, data interface{}) error {
@@ -179,9 +181,9 @@ func mainCacheClear() {
 	if Cache == nil {
 		return
 	}
-	if /*time.Now().Hour()!=3||*/ time.Since(mainCacheClearTime).Hours() < 30 {
+	/*if time.Now().Hour()!=3|| time.Since(mainCacheClearTime).Hours() < 30 {
 		return
-	}
+	}*/
 	mainCacheClearTime = time.Now()
 	/*if err := CacheFlush(); err != nil {
 		logrus.Errorf("mainCacheClear err:%v", err)
