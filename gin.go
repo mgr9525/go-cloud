@@ -23,7 +23,6 @@ func (c *ErrorRes) SetDest(dst string) *ErrorRes {
 
 type GinController interface {
 	GetPath() string // 必须"/"开头
-	GetMid() gin.HandlerFunc
 	Routes(g gin.IRoutes)
 }
 
@@ -35,9 +34,6 @@ func RegController(gc GinController) {
 	gp = Web
 	if len(gc.GetPath()) > 1 {
 		gp = Web.Group(gc.GetPath())
-		if gc.GetMid() != nil {
-			gp.Use(gc.GetMid())
-		}
 	}
 	gc.Routes(gp)
 }
