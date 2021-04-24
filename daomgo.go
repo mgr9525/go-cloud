@@ -66,6 +66,16 @@ func (c *mongo) Close() {
 	}
 }
 
+func (c *mongo) FindId(ctx context.Context, id interface{}) qmgo.QueryI {
+	ids := id
+	switch id.(type) {
+	case string:
+		if idt, err := primitive.ObjectIDFromHex(id.(string)); err == nil {
+			ids = idt
+		}
+	}
+	return c.C().Find(ctx, bson.M{"_id": ids})
+}
 func (c *mongo) UpdateId(ctx context.Context, id interface{}, update interface{}) error {
 	ids := id
 	switch id.(type) {
