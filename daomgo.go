@@ -12,7 +12,7 @@ type DaoMgo struct {
 	dbName string
 	cNmae  string
 }
-type mongo struct {
+type Mongo struct {
 	ses   *qmgo.Session
 	db    *qmgo.Database
 	cName string
@@ -29,9 +29,9 @@ func NewDaoMgo(d **qmgo.Client, dname string, cname string) *DaoMgo {
 func (c *DaoMgo) SetDbCli(e **qmgo.Client) {
 	c.dbcli = e
 }
-func (c *DaoMgo) GetSession() *mongo {
+func (c *DaoMgo) GetSession() *Mongo {
 	if c.dbcli != nil {
-		rt := new(mongo)
+		rt := new(Mongo)
 		//rt.ses = *c.db
 		rt.db = (*c.dbcli).Database(c.dbName)
 		rt.cName = c.cNmae
@@ -40,10 +40,10 @@ func (c *DaoMgo) GetSession() *mongo {
 	return nil
 }
 
-/*func (c *DaoMgo) NewSession() *mongo {
+/*func (c *DaoMgo) NewSession() *Mongo {
 	if c.dbcli != nil {
 		ses,_:=(*c.dbcli).Session()
-		rt := new(mongo)
+		rt := new(Mongo)
 		rt.ses = ses
 		rt.db =ses.
 		rt.cName = c.cNmae
@@ -52,13 +52,13 @@ func (c *DaoMgo) GetSession() *mongo {
 	return nil
 }*/
 
-func (c *mongo) GetDB() *qmgo.Database {
+func (c *Mongo) GetDB() *qmgo.Database {
 	return c.db
 }
-func (c *mongo) C() *qmgo.Collection {
+func (c *Mongo) C() *qmgo.Collection {
 	return c.db.Collection(c.cName)
 }
-func (c *mongo) Close() {
+func (c *Mongo) Close() {
 	if c.db != nil {
 		//c.ses.Close()
 		c.db = nil
@@ -66,7 +66,7 @@ func (c *mongo) Close() {
 	}
 }
 
-func (c *mongo) FindId(ctx context.Context, id interface{}) qmgo.QueryI {
+func (c *Mongo) FindId(ctx context.Context, id interface{}) qmgo.QueryI {
 	ids := id
 	switch id.(type) {
 	case string:
@@ -76,7 +76,7 @@ func (c *mongo) FindId(ctx context.Context, id interface{}) qmgo.QueryI {
 	}
 	return c.C().Find(ctx, bson.M{"_id": ids})
 }
-func (c *mongo) UpdateId(ctx context.Context, id interface{}, update interface{}) error {
+func (c *Mongo) UpdateId(ctx context.Context, id interface{}, update interface{}) error {
 	ids := id
 	switch id.(type) {
 	case string:
@@ -86,10 +86,10 @@ func (c *mongo) UpdateId(ctx context.Context, id interface{}, update interface{}
 	}
 	return c.C().UpdateId(ctx, ids, bson.M{"$set": update})
 }
-func (c *mongo) UpdateOne(ctx context.Context, filter, update interface{}) error {
+func (c *Mongo) UpdateOne(ctx context.Context, filter, update interface{}) error {
 	return c.C().UpdateOne(ctx, filter, bson.M{"$set": update})
 }
-func (c *mongo) FindCount(ctx context.Context, pars bson.M) int64 {
+func (c *Mongo) FindCount(ctx context.Context, pars bson.M) int64 {
 	n, err := c.C().Find(ctx, pars).Count()
 	if err != nil {
 		println(err.Error())
@@ -97,7 +97,7 @@ func (c *mongo) FindCount(ctx context.Context, pars bson.M) int64 {
 	}
 	return n
 }
-func (c *mongo) FindPage(ctx context.Context, ls interface{}, pars bson.M, page int64, size interface{}, sorts ...string) *Page {
+func (c *Mongo) FindPage(ctx context.Context, ls interface{}, pars bson.M, page int64, size interface{}, sorts ...string) *Page {
 	var pageno int64 = 1
 	var sizeno int64 = 10
 	var pagesno int64 = 0
