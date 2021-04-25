@@ -11,7 +11,7 @@ import (
 func main() {
 	gocloud.Web.Use(func(c *gin.Context) {
 		c.Next()
-		if c.Writer.Status() == http.StatusNotFound {
+		if c.Writer.Status() == http.StatusNotFound && c.Writer.Size() <= 0 {
 			c.String(http.StatusNotFound, "ruis not found")
 		}
 	})
