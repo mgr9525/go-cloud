@@ -41,9 +41,6 @@ func init() {
 		}
 		return AppName
 	}
-	Web.FuncMap["MgoIdHex"] = func(id primitive.ObjectID) string {
-		return id.Hex()
-	}
 	Web.FuncMap["Str2Html"] = func(s string) template.HTML {
 		return template.HTML(s)
 	}
