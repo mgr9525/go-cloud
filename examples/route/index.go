@@ -15,7 +15,7 @@ func (IndexController) GetMid() gin.HandlerFunc {
 }
 func (c *IndexController) Routes(g gin.IRoutes) {
 	g.Any("/", c.index)
-	g.Any("/test", gocloud.JsonHandle(c.test))
+	g.Any("/test", gocloud.HandleBind(c.test))
 }
 func (IndexController) index(c *gin.Context) {
 	c.HTML(200, "index.html", map[string]interface{}{"title": "123", "Name": "123"})
