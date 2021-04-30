@@ -98,8 +98,7 @@ func getTokenAuth(c *gin.Context) string {
 	if err != nil {
 		return ""
 	}
-	strings.Replace(aths, "TOKEN ", "", 1)
-	return aths
+	return strings.Replace(aths, "TOKEN ", "", 1)
 }
 func GetTokens(s string) jwt.MapClaims {
 	if s == "" {
