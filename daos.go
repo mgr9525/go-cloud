@@ -38,8 +38,8 @@ func (c *DBHelper) findCount(e *xorm.Session, data interface{}) (int64, error) {
 
 func (c *DBHelper) FindPage(ses *xorm.Session, ls interface{}, page int64, size ...int64) (*Page, error) {
 	session := c.NewSession()
-	defer session.Close()
 	count, err := c.findCount(session.Where(ses.Conds()), ls)
+	session.Close()
 	if err != nil {
 		return nil, err
 	}
