@@ -3,6 +3,7 @@ package gocloud
 import (
 	"errors"
 	"reflect"
+	"xorm.io/builder"
 	"xorm.io/xorm"
 )
 
@@ -36,16 +37,16 @@ func (c *DBHelper) findCount(e *xorm.Session, data interface{}) (int64, error) {
 	return 0, errors.New("GetCount err : not found any data")
 }
 
-func (c *DBHelper) FindPage(ses *xorm.Session, ls interface{}, page int64, size ...int64) (*Page, error) {
-	session := c.NewSession()
-	defer session.Close()
-	count, err := c.findCount(session.Where(ses.Conds()), ls)
+func (c *DBHelper) FindPage(conds builder.Cond, ls interface{}, page int64, size ...int64) (*Page, error) {
+	ses := c.NewSession()
+	count, err := c.findCount(ses.Where(conds), ls)
+	ses.Close()
 	if err != nil {
 		return nil, err
 	}
-	return c.FindPages(ses, ls, count, page, size...)
+	return c.FindPages(conds, ls, count, page, size...)
 }
-func (c *DBHelper) FindPages(ses *xorm.Session, ls interface{}, count, page int64, size ...int64) (*Page, error) {
+func (c *DBHelper) FindPages(conds builder.Cond, ls interface{}, count, page int64, size ...int64) (*Page, error) {
 	var pageno int64 = 1
 	var sizeno int64 = 10
 	var pagesno int64 = 0
@@ -57,6 +58,8 @@ func (c *DBHelper) FindPages(ses *xorm.Session, ls interface{}, count, page int6
 		sizeno = size[0]
 	}
 	start := (pageno - 1) * sizeno
+	ses := c.NewSession()
+	defer ses.Close()
 	err := ses.Limit(int(sizeno), int(start)).Find(ls)
 	if err != nil {
 		return nil, err
