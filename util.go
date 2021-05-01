@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"math/rand"
 	"net/http"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -16,11 +17,16 @@ func ClearXSS(src string) string {
 	rets = strings.Replace(rets, "'", "＇", -1)
 	return rets
 }
-func ClearHTML(src string) string {
-	rets := src
-	rets = strings.Replace(rets, "<", "＜", -1)
-	rets = strings.Replace(rets, ">", "＞", -1)
+
+func RepsHtml(src string) string {
+	rets := strings.ReplaceAll(src, "<", "＜")
+	rets = strings.ReplaceAll(src, ">", "＞")
 	return rets
+}
+func ClearHtml(src string) string {
+	re, _ := regexp.Compile("\\<[\\S\\s]+?\\>")
+	src = re.ReplaceAllString(src, "")
+	return strings.TrimSpace(src)
 }
 
 func MidAccessAllowFun(c *gin.Context) {
