@@ -45,7 +45,7 @@ func init() {
 		return template.HTML(s)
 	}
 	Web.FuncMap["ClearHtml"] = func(s string) string {
-		return ClearHTML(s)
+		return ClearHtml(s)
 	}
 
 	Web.FuncMap["FmtDate"] = func(t time.Time) string {
