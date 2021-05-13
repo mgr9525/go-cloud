@@ -2,7 +2,9 @@ package gocloud
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
+	"strings"
 	"xorm.io/xorm"
 )
 
@@ -43,9 +45,9 @@ func (c *DBHelper) FindPage(ses *xorm.Session, ls interface{}, page int64, size 
 	if err != nil {
 		return nil, err
 	}
-	return c.FindPages(ses, ls, count, page, size...)
+	return c.findPages(ses, ls, count, page, size...)
 }
-func (c *DBHelper) FindPages(ses *xorm.Session, ls interface{}, count, page int64, size ...int64) (*Page, error) {
+func (c *DBHelper) findPages(ses *xorm.Session, ls interface{}, count, page int64, size ...int64) (*Page, error) {
 	var pageno int64 = 1
 	var sizeno int64 = 10
 	var pagesno int64 = 0
@@ -74,4 +76,68 @@ func (c *DBHelper) FindPages(ses *xorm.Session, ls interface{}, count, page int6
 		Total: count,
 		Data:  ls,
 	}, nil
+}
+func (c *DBHelper) FindPages(gen *PageGen, ls interface{}, page int64, size ...int64) (*Page, error) {
+	var count int64
+	counts := "count(*)"
+	if gen.CountCols != "" {
+		counts = fmt.Sprintf("count(%s)", gen.CountCols)
+	}
+	sqls := strings.Replace(gen.SQL, "{{select}}", counts, 1)
+	sqls = strings.Replace(sqls, "{{limit}}", "", 1)
+	_, err := c.GetDB().SQL(sqls, gen.Args...).Get(&count)
+	if err != nil {
+		return nil, err
+	}
+
+	var pageno int64 = 1
+	var sizeno int64 = 10
+	var pagesno int64 = 0
+	//var count=c.FindCount(pars)
+	if page > 0 {
+		pageno = page
+	}
+	if len(size) > 0 && size[0] > 0 {
+		sizeno = size[0]
+	}
+	start := (pageno - 1) * sizeno
+
+	starts := ""
+	if start > 0 {
+		starts = fmt.Sprintf("%d,", start)
+	}
+	ses := c.NewSession()
+	defer ses.Close()
+	sqls = strings.Replace(gen.SQL, "{{select}}", gen.FindCols, 1)
+	if strings.Contains(sqls, "{{limit}}") {
+		sqls = strings.Replace(sqls, "{{limit}}", fmt.Sprintf("LIMIT %s%d", starts, sizeno), 1)
+	} else {
+		sqls += fmt.Sprintf("\nLIMIT %s%d", starts, sizeno)
+	}
+	err = ses.SQL(sqls, gen.Args...).Find(ls)
+	if err != nil {
+		return nil, err
+	}
+	pagest := count / sizeno
+	if count%sizeno > 0 {
+		pagesno = pagest + 1
+	} else {
+		pagesno = pagest
+	}
+	return &Page{
+		Page:  pageno,
+		Pages: pagesno,
+		Size:  sizeno,
+		Total: count,
+		Data:  ls,
+	}, nil
+}
+
+// use {{select}},{{limit}}
+
+type PageGen struct {
+	SQL       string
+	Args      []interface{}
+	CountCols string
+	FindCols  string
 }
