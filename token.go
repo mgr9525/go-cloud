@@ -2,12 +2,13 @@ package gocloud
 
 import (
 	"errors"
-	"github.com/dgrijalva/jwt-go"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-gonic/gin"
 )
 
 func CreateToken(claims jwt.MapClaims, tmout time.Duration) (string, error) {
@@ -38,6 +39,7 @@ func SetToken(c *gin.Context, p jwt.MapClaims, rem bool, doman ...string) (strin
 		Value:    tokens,
 		Name:     CloudConf.Token.Name,
 		HttpOnly: CloudConf.Token.Httponly,
+		SameSite: http.SameSiteNoneMode,
 	}
 	if CloudConf.Token.Path != "" {
 		cke.Path = CloudConf.Token.Path
