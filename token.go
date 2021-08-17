@@ -39,8 +39,8 @@ func SetToken(c *gin.Context, p jwt.MapClaims, rem bool, doman ...string) (strin
 		Value:    tokens,
 		Name:     CloudConf.Token.Name,
 		HttpOnly: CloudConf.Token.Httponly,
-		SameSite: http.SameSiteNoneMode,
-		Secure:   true,
+		SameSite: http.SameSite(CloudConf.Token.SameSite),
+		Secure:   CloudConf.Token.Secure,
 	}
 	if CloudConf.Token.Path != "" {
 		cke.Path = CloudConf.Token.Path

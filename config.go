@@ -2,8 +2,9 @@ package gocloud
 
 import (
 	"errors"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
+
+	"gopkg.in/yaml.v2"
 )
 
 var CloudConf *cloudConfig
@@ -42,6 +43,8 @@ type dbConfig struct {
 type tokenConfig struct {
 	Enable   bool
 	Httponly bool
+	Secure   bool
+	SameSite int `yaml:"sameSite"`
 	Name     string
 	Key      string
 	Path     string
