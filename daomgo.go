@@ -89,6 +89,9 @@ func (c *Mongo) UpdateId(ctx context.Context, id interface{}, update interface{}
 func (c *Mongo) UpdateOne(ctx context.Context, filter, update interface{}) error {
 	return c.C().UpdateOne(ctx, filter, bson.M{"$set": update})
 }
+func (c *Mongo) UpdateAll(ctx context.Context, filter, update interface{}) (*qmgo.UpdateResult, error) {
+	return c.C().UpdateAll(ctx, filter, bson.M{"$set": update})
+}
 func (c *Mongo) FindCount(ctx context.Context, pars bson.M) int64 {
 	n, err := c.C().Find(ctx, pars).Count()
 	if err != nil {
