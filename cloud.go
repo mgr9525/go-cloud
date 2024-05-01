@@ -93,7 +93,11 @@ func Run() error {
 		host = CloudConf.Server.Host
 	}
 	initFiles()
-	return Web.Run(fmt.Sprintf("%s:%d", host, CloudConf.Server.Port))
+	addrs := fmt.Sprintf("%s:%d", host, CloudConf.Server.Port)
+	if CloudConf.Server.TlsCert != "" && CloudConf.Server.TlsPriv != "" {
+		return Web.RunTLS(addrs, CloudConf.Server.TlsCert, CloudConf.Server.TlsPriv)
+	}
+	return Web.Run(addrs)
 }
 func initFiles() {
 	if _, err := os.Stat("templates"); os.IsNotExist(err) {

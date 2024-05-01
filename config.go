@@ -22,6 +22,9 @@ type serverConfig struct {
 	Host    string
 	Port    int
 	SysHost string `yaml:"sysHost"`
+
+	TlsCert string `yaml:"tlsCert"`
+	TlsPriv string `yaml:"tlsPriv"`
 }
 type cacheConfig struct {
 	Enable  bool
