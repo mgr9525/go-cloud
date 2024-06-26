@@ -10,7 +10,7 @@ require (
 	github.com/qiniu/qmgo v0.9.2
 	github.com/sirupsen/logrus v1.8.1
 	go.mongodb.org/mongo-driver v1.4.0
-	golang.org/x/image v0.0.0-20210220032944-ac19c3e999fb
+	golang.org/x/image v0.18.0
 	gopkg.in/yaml.v2 v2.4.0
 	xorm.io/xorm v1.0.6
 )
