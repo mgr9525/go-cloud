@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+
 	"xorm.io/xorm"
 )
 
@@ -38,20 +39,29 @@ func (c *DBHelper) findCount(e *xorm.Session, data interface{}) (int64, error) {
 	return 0, errors.New("GetCount err : not found any data")
 }
 
-func (c *DBHelper) FindPage(ses *xorm.Session, ls interface{}, page int64, size ...int64) (*Page, error) {
-	session := c.NewSession()
-	count, err := c.findCount(session.Where(ses.Conds()), ls)
-	session.Close()
-	if err != nil {
-		return nil, err
+func (c *DBHelper) FindPageAll(ses *xorm.Session, ls interface{}, page int64, size ...int64) (*Page, error) {
+	if len(size) > 0 && size[0] <= 0 && page <= 0 {
+		count, err := ses.FindAndCount(ls)
+		if err != nil {
+			return nil, err
+		}
+		return &Page{
+			Page:  0,
+			Pages: 0,
+			Size:  0,
+			Total: count,
+			Data:  ls,
+		}, nil
 	}
-	return c.findPages(ses, ls, count, page, size...)
+	return c.findPages(ses, ls, page, size...)
 }
-func (c *DBHelper) findPages(ses *xorm.Session, ls interface{}, count, page int64, size ...int64) (*Page, error) {
+func (c *DBHelper) FindPage(ses *xorm.Session, ls interface{}, page int64, size ...int64) (*Page, error) {
+	return c.findPages(ses, ls, page, size...)
+}
+func (c *DBHelper) findPages(ses *xorm.Session, ls interface{}, page int64, size ...int64) (*Page, error) {
 	var pageno int64 = 1
 	var sizeno int64 = 10
 	var pagesno int64 = 0
-	//var count=c.FindCount(pars)
 	if page > 0 {
 		pageno = page
 	}
@@ -59,7 +69,7 @@ func (c *DBHelper) findPages(ses *xorm.Session, ls interface{}, count, page int6
 		sizeno = size[0]
 	}
 	start := (pageno - 1) * sizeno
-	err := ses.Limit(int(sizeno), int(start)).Find(ls)
+	count, err := ses.Limit(int(sizeno), int(start)).FindAndCount(ls)
 	if err != nil {
 		return nil, err
 	}
