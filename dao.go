@@ -25,14 +25,9 @@ func (c *DBHelper) GetDB() *xorm.Engine {
 }
 
 /*
-NewSession : get a new xorm.Session
+NewSession : get a new xorm.Session with auto close
 */
-func (c *DBHelper) NewSession() *xorm.Session {
-	return c.db.NewSession()
-}
-
-// NewSessions: get a new xorm.Session with auto close
-func (c *DBHelper) NewSessions(ctxs ...context.Context) *xorm.Session {
+func (c *DBHelper) NewSession(ctxs ...context.Context) *xorm.Session {
 	var ctx context.Context
 	if len(ctxs) > 0 {
 		ctx = ctxs[0]
