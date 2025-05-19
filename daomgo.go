@@ -2,6 +2,7 @@ package gocloud
 
 import (
 	"context"
+
 	"github.com/qiniu/qmgo"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -30,7 +31,7 @@ func (c *DaoMgo) SetDbCli(e **qmgo.Client) {
 	c.dbcli = e
 }
 func (c *DaoMgo) GetSession() *Mongo {
-	if c.dbcli != nil {
+	if c.dbcli != nil && *c.dbcli != nil {
 		rt := new(Mongo)
 		//rt.ses = *c.db
 		rt.db = (*c.dbcli).Database(c.dbName)
