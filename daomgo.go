@@ -113,10 +113,8 @@ func (c *Mongo) FindPage(ctx context.Context, ls interface{}, pars bson.M, page 
 		switch size.(type) {
 		case int:
 			sizeno = int64(size.(int))
-			break
 		case int64:
 			sizeno = size.(int64)
-			break
 		}
 	}
 	start := (pageno - 1) * sizeno
