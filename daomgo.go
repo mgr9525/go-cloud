@@ -101,7 +101,7 @@ func (c *Mongo) FindCount(ctx context.Context, pars bson.M) int64 {
 	}
 	return n
 }
-func (c *Mongo) FindPage(ctx context.Context, ls interface{}, pars bson.M, page int64, size interface{}, sorts ...string) *Page {
+func (c *Mongo) FindPage(ctx context.Context, ls interface{}, pars bson.M, page int64, size interface{}, sorts ...string) (*Page, error) {
 	var pageno int64 = 1
 	var sizeno int64 = 10
 	var pagesno int64 = 0
@@ -129,8 +129,7 @@ func (c *Mongo) FindPage(ctx context.Context, ls interface{}, pars bson.M, page 
 	}
 	err := q.All(ls)
 	if err != nil {
-		println(err.Error())
-		return nil
+		return nil, err
 	}
 	count := int64(c.FindCount(ctx, pars))
 	pagest := count / sizeno
@@ -145,5 +144,5 @@ func (c *Mongo) FindPage(ctx context.Context, ls interface{}, pars bson.M, page 
 		Size:  sizeno,
 		Total: count,
 		Data:  ls,
-	}
+	}, nil
 }
