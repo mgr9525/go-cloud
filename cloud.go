@@ -83,7 +83,7 @@ func Init(pths ...string) error {
 
 	return nil
 }
-func Run(customFn ...func(web *gin.Engine) error) error {
+func Run(customFn ...func(web *gin.Engine, addrs string) error) error {
 	if CloudConf == nil {
 		if err := Init(); err != nil {
 			return err
@@ -95,10 +95,10 @@ func Run(customFn ...func(web *gin.Engine) error) error {
 	}
 	initFiles()
 
+	addrs := fmt.Sprintf("%s:%d", host, CloudConf.Server.Port)
 	if len(customFn) > 0 && customFn[0] != nil {
-		return customFn[0](Web)
+		return customFn[0](Web, addrs)
 	} else {
-		addrs := fmt.Sprintf("%s:%d", host, CloudConf.Server.Port)
 		if CloudConf.Server.TlsCert != "" && CloudConf.Server.TlsPriv != "" {
 			return Web.RunTLS(addrs, CloudConf.Server.TlsCert, CloudConf.Server.TlsPriv)
 		}
