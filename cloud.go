@@ -2,15 +2,16 @@ package gocloud
 
 import (
 	"fmt"
-	"github.com/boltdb/bolt"
-	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"html/template"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/boltdb/bolt"
+	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 var (
@@ -82,7 +83,7 @@ func Init(pths ...string) error {
 
 	return nil
 }
-func Run() error {
+func Run(customFn ...func(web *gin.Engine) error) error {
 	if CloudConf == nil {
 		if err := Init(); err != nil {
 			return err
@@ -93,11 +94,16 @@ func Run() error {
 		host = CloudConf.Server.Host
 	}
 	initFiles()
-	addrs := fmt.Sprintf("%s:%d", host, CloudConf.Server.Port)
-	if CloudConf.Server.TlsCert != "" && CloudConf.Server.TlsPriv != "" {
-		return Web.RunTLS(addrs, CloudConf.Server.TlsCert, CloudConf.Server.TlsPriv)
+
+	if len(customFn) > 0 && customFn[0] != nil {
+		return customFn[0](Web)
+	} else {
+		addrs := fmt.Sprintf("%s:%d", host, CloudConf.Server.Port)
+		if CloudConf.Server.TlsCert != "" && CloudConf.Server.TlsPriv != "" {
+			return Web.RunTLS(addrs, CloudConf.Server.TlsCert, CloudConf.Server.TlsPriv)
+		}
+		return Web.Run(addrs)
 	}
-	return Web.Run(addrs)
 }
 func initFiles() {
 	if _, err := os.Stat("templates"); os.IsNotExist(err) {
