@@ -10,7 +10,7 @@ import (
 
 type DaoMgo struct {
 	dbcli  **qmgo.Client
-	dbName string
+	dbName *string
 	cNmae  string
 }
 type Mongo struct {
@@ -19,7 +19,7 @@ type Mongo struct {
 	cName string
 }
 
-func NewDaoMgo(d **qmgo.Client, dname string, cname string) *DaoMgo {
+func NewDaoMgo(d **qmgo.Client, dname *string, cname string) *DaoMgo {
 	e := new(DaoMgo)
 	e.dbcli = d
 	e.dbName = dname
@@ -34,7 +34,7 @@ func (c *DaoMgo) GetSession() *Mongo {
 	if c.dbcli != nil && *c.dbcli != nil {
 		rt := new(Mongo)
 		//rt.ses = *c.db
-		rt.db = (*c.dbcli).Database(c.dbName)
+		rt.db = (*c.dbcli).Database(*c.dbName)
 		rt.cName = c.cNmae
 		return rt
 	}
