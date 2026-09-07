@@ -116,7 +116,7 @@ func (c *DBHelper) FindPages(gen *PageGen, ls interface{}, page int64, size ...i
 	if start > 0 {
 		starts = fmt.Sprintf("%d,", start)
 	}
-	ses := c.GetDB().NewSession()
+	ses := c.CtxSession()
 	defer ses.Close()
 	sqls = strings.Replace(gen.SQL, "{{select}}", gen.FindCols, 1)
 	if strings.Contains(sqls, "{{limit}}") {
